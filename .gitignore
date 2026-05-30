@@ -1,0 +1,56 @@
+# === Model weights / checkpoints (sunucuda kalsın, repoya girmesin) ===
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.h5
+*.onnx
+
+# === Büyük veri dosyaları ===
+*.parquet
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.pdb
+*.fasta
+*.a3m
+*.mmcif
+*.cif
+
+# === Loglar / Slurm çıktıları ===
+*.out
+*.err
+*.log
+slurm-*.out
+wandb/
+wandb_merge_all_*.out
+wandb_merge_all_*.err
+
+# === Sırlar / kimlik bilgileri (ASLA commit etme) ===
+access_token
+access_token*
+*token*
+*secret*
+*.pem
+*.key
+*credential*
+*password*
+.netrc
+.env
+.env.*
+
+# === Python ===
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+env/
+venv/
+
+# === Editör / OS ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

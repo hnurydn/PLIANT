@@ -1,0 +1,222 @@
+import math, os, sys, torch
+import torch.nn as nn
+
+# Mevcut dizini path'e ekle (import sorunlarını önlemek için)
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from layers_esm2_vector_gating import ProteinEGNN, LigandGAT, ProLig
+from nnutils import create_var, create_var_gpu
+
+class PLANET(nn.Module):
+    def __init__(self, feature_dims, nheads, key_dims, value_dims, pro_update_inters, lig_update_iters, pro_lig_update_iters, device):
+        super().__init__()
+        self.device = torch.device(device)
+        self.feature_dims = feature_dims
+        
+        # 1. Katmanlar
+        self.proteinegnn = ProteinEGNN(feature_dims, pro_update_inters, self.device)
+        self.ligandgat = LigandGAT(feature_dims, nheads, key_dims, value_dims, lig_update_iters, self.device)
+        
+        # ProLig: Artık geometrik hesaplamalar için koordinatları bekleyen yeni versiyonu çağırıyoruz
+        self.prolig = ProLig(feature_dims, nheads, pro_lig_update_iters, self.device)
+
+        # 2. Uncertainty Weighting (Belirsizlik Ağırlıklandırma) Parametreleri
+        # Train dosyasında loss'ları dinamik dengelemek için kullanılan öğrenilebilir sigma parametreleri.
+        self.log_sigma_lig = nn.Parameter(torch.tensor(0.0, device=self.device), requires_grad=True)
+        self.log_sigma_pl = nn.Parameter(torch.tensor(0.0, device=self.device), requires_grad=True)
+        self.log_sigma_affinity = nn.Parameter(torch.tensor(0.0, device=self.device), requires_grad=True)
+
+        # 3. Kayıp Fonksiyonları
+        self.ligand_interaction_loss = nn.BCELoss(reduction='sum')
+        self.pro_lig_interaction_loss = nn.BCELoss(reduction='sum')
+        self.mse_loss = nn.MSELoss(reduction='none')
+
+    def forward(self, res_batch, mol_batch):
+        """
+        Modelin ileri yayılımı (Training/Validation sırasında çağrılır).
+        
+        res_batch: Protein verisi (Özellikler, Harita, Scope, Koordinatlar)
+        mol_batch: Ligand verisi (Atomlar, Bağlar, Graf, Scope, KOORDİNATLAR)
+        """
+        # --- A. Protein Verisini Hazırla ---
+        # alpha_coordinates: Protein backbone koordinatları
+        (fresidues, res_map, res_scope, alpha_coordinates) = res_batch
+        fresidues = fresidues.to(self.device)
+        alpha_coordinates = create_var(alpha_coordinates).to(self.device)
+
+        # --- B. Ligand Verisini Hazırla ---
+        # DİKKAT: Dataset'ten lig_coordinates'in (6. eleman) geldiğinden emin olmalıyız.
+        # Eğer dataset 5 eleman döndürüyorsa 'PLANET_datautils_esm2.py' dosyasında collate_fn güncellenmelidir.
+        if len(mol_batch) == 6:
+            (fatoms, fbonds, agraph, bgraph, lig_scope, lig_coordinates) = mol_batch
+        else:
+            # Hata yakalama: Eğer eski dataset kullanılıyorsa uyarı ver.
+            raise ValueError(f"Model 6 elemanlı mol_batch bekliyor (lig_coordinates dahil), ancak {len(mol_batch)} eleman geldi. Lütfen datautils dosyasını kontrol edin.")
+
+        fatoms = fatoms.to(self.device)
+        fbonds = fbonds.to(self.device)
+        agraph = agraph.to(self.device)
+        bgraph = bgraph.to(self.device)
+        lig_coordinates = create_var(lig_coordinates).to(self.device)
+
+        # --- C. Alt Katmanlardan Geçiş ---
+        
+        # 1. Protein Embedding (EGNN - Koordinat kullanır)
+        fresidues = self.proteinegnn(fresidues, alpha_coordinates, res_scope)
+        
+        # 2. Ligand Embedding (GAT - Graph tabanlı)
+        fatoms = self.ligandgat(fatoms, fbonds, agraph, bgraph, lig_scope)
+         
+        # 3. Protein-Ligand Etkileşimi (ProLig)
+        # KRİTİK NOKTA: Hem protein (alpha) hem ligand koordinatlarını buraya paslıyoruz.
+        predicted_lig_interactions, predicted_interactions, predicted_affinities = self.prolig(
+            fresidues, fatoms, res_scope, lig_scope, alpha_coordinates, lig_coordinates
+        )
+        
+        return (predicted_lig_interactions, predicted_interactions, predicted_affinities)
+    
+    # --- BURASI DEĞİŞTİ: CONTRASTIVE LOSS EKLENDİ ---
+    def compute_loss(self, predictions, targets, res_batch, mol_batch):
+        predicted_lig_interactions, predicted_interactions, predicted_affinities = predictions
+        (_, _, res_scope, _) = res_batch
+        lig_scope = mol_batch[4] 
+
+        mol_intearctions, pro_lig_interactions, pKs, pK_flags, complex_labels = targets
+        mol_intearctions = create_var(mol_intearctions)
+        pro_lig_interactions = create_var(pro_lig_interactions)
+        pKs = create_var(pKs)
+        pK_flags = create_var(pK_flags)
+        
+        # 1. Etkileşim Kayıpları (Interaction Loss)
+        lig_interaction_count, pro_lig_interaction_count = 0, 0
+        lig_interaction_loss, pro_lig_interaction_loss = [], []
+        
+        for ((_, res_count), (_, atom_count), complex_label) in zip(res_scope, lig_scope, complex_labels):
+            lig_total_points = atom_count**2
+            l_loss = self.ligand_interaction_loss(
+                predicted_lig_interactions[lig_interaction_count : lig_interaction_count + lig_total_points],
+                mol_intearctions[lig_interaction_count : lig_interaction_count + lig_total_points]
+            ) / lig_total_points
+            
+            pl_total_points = atom_count * res_count
+            pl_loss = self.pro_lig_interaction_loss(
+                predicted_interactions[pro_lig_interaction_count : pro_lig_interaction_count + pl_total_points],
+                pro_lig_interactions[pro_lig_interaction_count : pro_lig_interaction_count + pl_total_points]
+            ) / pl_total_points
+
+            if complex_label == 1:
+                lig_interaction_loss.append(l_loss)
+            pro_lig_interaction_loss.append(pl_loss)
+            
+            lig_interaction_count += lig_total_points
+            pro_lig_interaction_count += pl_total_points
+            
+        lig_interaction_loss = torch.mean(torch.stack(lig_interaction_loss))
+        pro_lig_interaction_loss = torch.mean(torch.stack(pro_lig_interaction_loss))
+        
+        # 2. Affinity Loss (Sadece Aktif Ligandlar için MSE)
+        # complex_labels == 1 : Gerçek Ligand
+        # pK_flags == 1       : pK değeri biliniyor
+        affinity_mse = torch.sum(self.mse_loss(predicted_affinities, pKs) * pK_flags) / (torch.sum(pK_flags) + 1e-6)
+        
+        # --- 3. YENİ: CONTRASTIVE LOSS (Muz Kabuğu / Banana Decoys) ---
+        # Amaç: Decoy (Sahte) puanları, Aktif (Gerçek) puanlardan düşük olmalı.
+        
+        # Aktif ve Decoy olanların indekslerini bul
+        active_indices = (complex_labels == 1) & (pK_flags == 1)
+        decoy_indices = (complex_labels == 0)
+        
+        active_preds = predicted_affinities[active_indices]
+        decoy_preds = predicted_affinities[decoy_indices]
+        
+        contrastive_loss = torch.tensor(0.0, device=self.device)
+        
+        # Eğer batch içinde hem aktif hem decoy varsa karşılaştır
+        if len(decoy_preds) > 0 and len(active_preds) > 0:
+            # Batch içindeki her bir Decoy'u, her bir Aktif ile kıyasla (Matrix farkı)
+            # Boyutlar: [N_decoy, 1] - [1, N_active] = [N_decoy, N_active]
+            diff = decoy_preds.unsqueeze(1) - active_preds.unsqueeze(0)
+            
+            # Margin: Decoy puanı, Aktif puandan en az 2.0 birim düşük olmalı.
+            margin = 2.0
+            
+            # Formül: max(0, Decoy - Active + Margin)
+            # Eğer (Decoy - Active) < -2.0 ise loss 0 olur (İstediğimiz durum).
+            # Eğer Decoy puanı Active'e yakınsa veya büyükse ceza kesilir.
+            contrastive_loss = torch.mean(torch.relu(diff + margin))
+            
+        # Toplam Affinity Loss'a ekle (Katsayı 0.5 ile dengelenebilir ama şimdilik direkt ekliyoruz)
+        total_affinity_term = affinity_mse + contrastive_loss
+        
+        # 4. Uncertainty Weighting ile Hepsini Birleştir
+        loss = (lig_interaction_loss / (2 * torch.exp(self.log_sigma_lig)) + self.log_sigma_lig / 2 +
+                pro_lig_interaction_loss / (2 * torch.exp(self.log_sigma_pl)) + self.log_sigma_pl / 2 +
+                total_affinity_term / (2 * torch.exp(self.log_sigma_affinity)) + self.log_sigma_affinity / 2)
+        
+        # Loglarda görmek için affinity_mse ve contrastive_loss toplamını döndürüyoruz
+        return lig_interaction_loss, pro_lig_interaction_loss, total_affinity_term
+    
+    @staticmethod
+    def compute_metrics(predictions, targets):
+        """
+        Doğruluk (Accuracy) ve MAE metriklerini hesaplar.
+        """
+        predicted_lig_interactions, predicted_interactions, predicted_affinities = predictions
+        mol_intearctions, pro_lig_interactions, pKs, pK_flags, _ = targets
+        
+        mol_intearctions = create_var(mol_intearctions)
+        pro_lig_interactions = create_var(pro_lig_interactions)
+        pKs = create_var(pKs)
+        pK_flags = create_var(pK_flags)
+
+        # Threshold 0.5 ile Binary Accuracy
+        lig_interaction_result = torch.where(predicted_lig_interactions > 0.5, 1., 0.)
+        lig_interaction_acc = torch.mean(torch.where(lig_interaction_result == mol_intearctions, 1., 0.)) 
+
+        pro_lig_interaction_result = torch.where(predicted_interactions > 0.5, 1., 0.)
+        pro_lig_interaction_acc = torch.mean(torch.where(pro_lig_interaction_result == pro_lig_interactions, 1., 0.))
+
+        # Affinity MAE
+        affinity_mae = torch.sum(torch.abs(predicted_affinities - pKs) * pK_flags) / (torch.sum(pK_flags) + 1e-6)
+        
+        return lig_interaction_acc, pro_lig_interaction_acc, affinity_mae
+
+    def load_parameters(self, parameters=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'PLANET.param')):
+        self.load_state_dict(torch.load(parameters, map_location=self.device))
+        
+    # --- Tarama (Screening) Yardımcı Fonksiyonları ---
+    
+    def cal_res_features_helper(self, fresidues, coordinates):
+        fresidues = fresidues.to(self.device)
+        coordinates = coordinates.to(self.device)
+        fresidues = self.proteinegnn.pre_cal_res_features(fresidues, coordinates)
+        return fresidues
+
+    def cal_res_features(self, fresidues, batch_size):
+        res_scope = [(i * int(fresidues.shape[0]), int(fresidues.shape[0])) for i in range(0, batch_size)]
+        fresidues = fresidues.repeat(batch_size, 1)
+        return fresidues, res_scope
+
+    def screening(self, fresidues, res_scope, mol_feature_batch, res_coordinates):
+        """
+        Tarama modunda kullanılır. 
+        DİKKAT: Artık res_coordinates (protein koordinatları) da parametre olarak verilmelidir.
+        """
+        # Mol batch unpack (Koordinat dahil)
+        (fatoms, fbonds, agraph, bgraph, lig_scope, lig_coordinates) = mol_feature_batch
+        
+        fatoms = fatoms.to(self.device)
+        fbonds = fbonds.to(self.device)
+        agraph = agraph.to(self.device)
+        bgraph = bgraph.to(self.device)
+        lig_coordinates = create_var(lig_coordinates).to(self.device)
+        res_coordinates = create_var(res_coordinates).to(self.device)
+
+        # Ligand Embedding
+        fatoms = self.ligandgat(fatoms, fbonds, agraph, bgraph, lig_scope)
+        
+        # Etkileşim Tahmini (Koordinatlı)
+        _, _, predicted_affinities = self.prolig(
+            fresidues, fatoms, res_scope, lig_scope, res_coordinates, lig_coordinates
+        )
+        return predicted_affinities
