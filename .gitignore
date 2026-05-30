@@ -19,6 +19,10 @@
 *.mmcif
 *.cif
 
+# === LMDB veri tabanları (25GB+ veri; sunucuda kalır, sadece *_meta.json versiyonlanır) ===
+*.mdb
+*.lmdb/
+
 # === Loglar / Slurm çıktıları ===
 *.out
 *.err
