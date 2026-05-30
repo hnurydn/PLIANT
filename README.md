@@ -22,6 +22,34 @@ ESM2 embeddings + Uncertainty Weighting (UW) + Vector Gating + Contrastive Loss
 └── *.py, *.sh             # Üst seviye çalıştırma ve Slurm scriptleri
 ```
 
+## Veri Setleri
+
+Eğitim/test verileri (LMDB) büyük olduğu için (~34 GB) GitHub'da tutulmaz;
+**Hugging Face**'te private bir dataset olarak barındırılır:
+
+🤗 **https://huggingface.co/datasets/hnurydn/PLANET-datasets**
+
+| Alt klasör | Açıklama | Boyut |
+|-----------|----------|-------|
+| `lmdb_planet/` | ESM'siz (no-ESM) — `noESM_*` modelleri | ~9 GB |
+| `lmdb_planet_v2/` | ESM2 embedding'li (v2) | ~25 GB |
+
+Klonlamak için (private olduğundan önce `huggingface-cli login` ile giriş gerekir):
+
+```bash
+git clone https://huggingface.co/datasets/hnurydn/PLANET-datasets
+```
+
+veya sadece bir alt klasörü indirmek için:
+
+```bash
+huggingface-cli download hnurydn/PLANET-datasets --repo-type dataset \
+  --include "lmdb_planet_v2/*" --local-dir datasets/pdbbind2020
+```
+
+Detaylı bilgi: [`datasets/pdbbind2020/lmdb_planet/DATASET.md`](datasets/pdbbind2020/lmdb_planet/DATASET.md)
+ve [`.../lmdb_planet_v2/DATASET.md`](datasets/pdbbind2020/lmdb_planet_v2/DATASET.md).
+
 ## Notlar
 
 - İşler TRUBA ARF kümesinde **Slurm** ile çalıştırılır (`sbatch *.sh`).
