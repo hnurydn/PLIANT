@@ -73,7 +73,11 @@ def load_pose_perturbation_results(path):
 def make_figure_pose_dependence(csv_path):
     data = load_pose_perturbation_results(csv_path)
 
-    fig, axes = plt.subplots(1, 2, figsize=(8.5, 3.6), constrained_layout=True)
+    # JCIM/ACS Appendix 2: double-column graphics max 7.0 in wide (504 pt).
+    # bbox_inches="tight" expands the saved canvas to include the external
+    # below-plot legend, so the base figsize must undershoot 7.0 in to leave
+    # headroom -- verified empirically (see figures format-check notes).
+    fig, axes = plt.subplots(1, 2, figsize=(6.7, 3.0), constrained_layout=True)
 
     panels = [
         ("BinderOnly_AUROC", "Binder-only contact AUROC", axes[0], (0.80, 1.0)),
@@ -130,7 +134,7 @@ MODEL_LABEL_S = {
     "ESM_UW": "ESM_UW",
     "NoESM_UW": "NoESM_UW",
     "ESM_VG": "ESM_VG",
-    "ESM_VG_Contrastive": "ESM_VG_Contrastive",
+    "ESM_VG_Contrastive": "ESM_VG_\nContrastive",
     "v4_Projection": "v4_Projection",
 }
 CHOSEN_STEP = 1_900_000
@@ -150,7 +154,9 @@ def load_checkpoint_curves(path):
 def make_figure_checkpoint_plateau(csv_path):
     data = load_checkpoint_curves(csv_path)
 
-    fig, axes = plt.subplots(2, 4, figsize=(11, 5), constrained_layout=True, sharex=True)
+    # Same 7.0 in double-column cap applied here (Supporting Information
+    # figures are still submitted/typeset in the same column format).
+    fig, axes = plt.subplots(2, 4, figsize=(6.75, 3.05), constrained_layout=True, sharex=True)
     axes_flat = axes.flatten()
 
     line_color = "#4a3aa7"  # slot 7: violet -- ana figurden ayri, tek-seri renk
@@ -170,7 +176,7 @@ def make_figure_checkpoint_plateau(csv_path):
             cy = float(chosen_rows[0]["Test_Affinity_Pearson"])
             ax.scatter([CHOSEN_STEP / 1e6], [cy], color="#e34948", s=28, zorder=3)
 
-        ax.set_title(MODEL_LABEL_S[model_key], fontsize=9.5, fontweight="bold")
+        ax.set_title(MODEL_LABEL_S[model_key], fontsize=8.5, fontweight="bold", linespacing=1.1)
         ax.tick_params(labelsize=8)
 
     # kullanilmayan 8. panel -> lejant icin
