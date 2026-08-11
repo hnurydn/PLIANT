@@ -15,7 +15,7 @@ Everything here maps directly onto the Methods subsections of the manuscript:
 | [`checkpoint_analysis/`](checkpoint_analysis/) | §2.6 Checkpoint Robustness Analysis | Reconstructs per-checkpoint test-metric trajectories for all 7 model variants directly from WandB training logs (no extra GPU compute) |
 | [`seed_robustness/`](seed_robustness/) | §2.7 Seed-Robustness Protocol | Seeded re-training scripts (3 seeds) for the baseline, ESM_VG, and v4_Projection variants, and their Slurm launchers |
 | [`statistical_analysis/`](statistical_analysis/) | §2.8 Statistical Significance Testing | Per-target one-sided Wilcoxon signed-rank analysis on DUD-E (101 targets) and LIT-PCBA (15 targets), for both "centered" and "original" (non-recentered) ligand-pose preprocessing |
-| [`figures/`](figures/) | Figure 1, Figure S1 | Generates the pose-dependence and checkpoint-plateau figures from the CSVs above |
+| [`figures/`](figures/) | Figure 1, Figure S1, TOC graphic | Generates the pose-dependence figure, checkpoint-plateau figure, and the JCIM Table-of-Contents graphic (`toc_graphic.tiff`, 9.0×3.5 cm @ 300 dpi per ACS spec) from the CSVs above |
 
 ## Key finding these scripts establish
 
