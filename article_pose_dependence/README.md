@@ -43,11 +43,15 @@ Same conda environment as the main repo (`pocketgen`), plus:
 - The base LMDB training/test datasets (`lmdb_planet/`, `lmdb_planet_v2/`,
   ~34 GB) live in the [Hugging Face dataset
   repo](https://huggingface.co/datasets/hnurydn/PLANET-datasets), not here.
-- Trained model checkpoints (`.safetensors`) used to produce
-  `pose_perturbation_eval_results.csv` and the WandB-derived curves are
-  referenced by run ID in `checkpoint_analysis/fetch_checkpoint_curves_from_wandb.py`
-  and are not redistributed in this repo (see Data Availability Statement
-  in the manuscript for archival status).
+- Trained model checkpoints (step 1,900,000, one per model variant, ~297 MB
+  total) used to produce `pose_perturbation_eval_results.csv` and the
+  WandB-derived curves are not stored in this Git repo (binary weights
+  belong on Hugging Face per this project's convention — see top-level
+  [README](../README.md)). They are archived at
+  https://huggingface.co/datasets/hnurydn/PLANET-datasets under
+  `checkpoints_article_pose_dependence/`. The staging/upload script used to
+  produce that archive is
+  [`checkpoint_analysis/hf_upload_checkpoints.py`](checkpoint_analysis/hf_upload_checkpoints.py).
 
 ## Notes on script provenance
 
