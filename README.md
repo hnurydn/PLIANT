@@ -16,11 +16,21 @@ ESM2 embeddings + Uncertainty Weighting (UW) + Vector Gating + Contrastive Loss
 
 ```
 .
-├── Dataset_preparation/   # Veri hazırlama / ön işleme scriptleri
-├── Model/                 # Model tanımları ve eğitim scriptleri
-├── Scripts/               # Yardımcı scriptler
-└── *.py, *.sh             # Üst seviye çalıştırma ve Slurm scriptleri
+├── Dataset_preparation/     # Veri hazırlama / ön işleme scriptleri
+├── Model/                   # Model tanımları ve eğitim scriptleri
+├── Scripts/                 # Yardımcı scriptler
+├── article_pose_dependence/ # Makale reprodüktibilite paketi (bkz. aşağı)
+└── *.py, *.sh                # Üst seviye çalıştırma ve Slurm scriptleri
 ```
+
+## Makale: Pose-(In)dependence Reprodüktibilite Paketi
+
+Tez sonrası yapılan ek analizler (pose-perturbation deneyi, checkpoint
+robustness, seed-robustness, DUD-E/LIT-PCBA istatistiksel anlamlılık testleri
+ve figürler) — *Journal of Chemical Information and Modeling*'e gönderilen
+makalenin kodu ve türetilmiş verileri:
+
+📁 **[`article_pose_dependence/`](article_pose_dependence/)**
 
 ## Veri Setleri
 
