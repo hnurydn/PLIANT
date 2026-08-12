@@ -5,11 +5,14 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR ---
 # Makale standartlarina (Table S2) gore guncellenmis PDB JSON dosyasi
-JSON_FILE = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_pdb.json"
-BASE_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/LIT-PCBA"
+JSON_FILE = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_pdb.json")
+BASE_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/LIT-PCBA")
 
 # TEST MODU: Hizlica test etmek icin 1000 molekul. 
 # Gercek egitim icin: LIMIT_MOLECULES = None

@@ -12,13 +12,16 @@ import os, pickle, lmdb, json, h5py, argparse
 import numpy as np
 from tqdm import tqdm
 from sklearn.decomposition import PCA
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # =======================================================
 # PARAMETRELER
 # =======================================================
-ESM2_H5_PATH   = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/pdbbind2020_esm2_embeddings_v2.h5'
-PCA_PARAMS_PATH = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/esm2_pca_params.pkl'
-PDB_MAP_JSON   = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
+ESM2_H5_PATH   = os.path.join(PLANET_ROOT, "pdbbind2020_esm2_embeddings_v2.h5")
+PCA_PARAMS_PATH = os.path.join(PLANET_ROOT, "esm2_pca_params.pkl")
+PDB_MAP_JSON   = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
 HEDEF_BOYUT    = 512
 MAP_SIZE_GB    = 200
 

@@ -7,10 +7,13 @@ import esm
 import h5py
 from tqdm import tqdm
 from Bio import SeqIO # BioPython gerekli
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR ---
-DEFAULT_FASTA = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_sequences_for_esm2.fasta"
-OUTPUT_H5_FILE = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_esm2_embeddings.h5"
+DEFAULT_FASTA = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_sequences_for_esm2.fasta")
+OUTPUT_H5_FILE = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_esm2_embeddings.h5")
 
 # ESM-2 650M Model
 MODEL_NAME = "esm2_t33_650M_UR50D"

@@ -3,9 +3,12 @@ import os
 import sys
 import traceback
 from rdkit import Chem
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # 1. Chemutils Patchli Versiyonu Yukle
-sys.path.append("/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation")
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 try:
     from chemutils_dude import ComplexPocket
     print("✅ chemutils_dude (PATCHED) yuklendi.")
@@ -15,7 +18,7 @@ except ImportError:
 
 # Ayarlar
 TEST_TARGET = "ADRB2"
-JSON_FILE = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_pdb.json"
+JSON_FILE = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_pdb.json")
 
 def main():
     print(f"\n🔍 DEBUG BASLIYOR: {TEST_TARGET} hedefini test ediyoruz...")

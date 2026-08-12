@@ -4,16 +4,19 @@ import json
 import numpy as np
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm # İlerleme çubuğu
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR ---
 # Adım 2'den gelen ana JSON haritası (küçük harfli PDB ID'leri içerir)
-JSON_MAP_FILE = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json"
+JSON_MAP_FILE = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
 
 # PDBbind'in resmi Core Set (CASF-2016) PDB ID'lerinin listesi (büyük harfli PDB ID'leri içerir)
-CORE_SET_LIST_FILE = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/casf2016_input_PLANET.csv"
+CORE_SET_LIST_FILE = os.path.join(PLANET_ROOT, "datasets/casf2016_input_PLANET.csv")
 
 # Oluşturulacak CSV'lerin kaydedileceği yer
-OUTPUT_CSV_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/index"
+OUTPUT_CSV_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/index")
 # --- BİTİŞ AYARLARI ---
 
 def main():

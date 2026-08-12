@@ -1,8 +1,11 @@
 import json, os, shutil
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
 
-JSON = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
-DST  = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/all_pickles'
+
+
+JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
+DST  = os.path.join(PLANET_ROOT, "datasets/all_pickles")
 os.makedirs(DST, exist_ok=True)
 
 with open(JSON) as f:

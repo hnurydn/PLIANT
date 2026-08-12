@@ -20,8 +20,8 @@ Kullanım (tek model, tüm RMSD bin'leri):
     python pose_perturbation_eval.py \
         --model_type vg \
         --model_label ESM_VG \
-        --ckpt_path /arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/ESM2_UW_VECTOR_GATING_1:11/PLANET.iter-1900000 \
-        --valid_data /arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/lmdb_planet_v2/valid.lmdb \
+        --ckpt_path $PLANET_ROOT/ESM2_UW_VECTOR_GATING_1:11/PLANET.iter-1900000 \
+        --valid_data $PLANET_ROOT/datasets/pdbbind2020/lmdb_planet_v2/valid.lmdb \
         --test_data_dir /arf/scratch/hnaydin/PLANET_ORIGINAL/pose_perturbation_output_esm \
         --rmsd_bins 0,1,2,3,4 \
         --dims 512 \
@@ -40,6 +40,9 @@ from sklearn.metrics import (roc_auc_score, average_precision_score,
                               f1_score, precision_score, recall_score, roc_curve,
                               mean_absolute_error)
 from torch.utils.data import DataLoader
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 
 # ───────────────────────────── Model dispatch ─────────────────────────────

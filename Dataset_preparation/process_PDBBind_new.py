@@ -4,6 +4,9 @@ from functools import partial
 from multiprocessing import Pool
 from tqdm import tqdm
 from typing import List, Tuple
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 try:
     from rdkit import Chem
@@ -16,9 +19,9 @@ except ImportError as e:
     sys.exit(1)
 
 # --- AYARLAR (Sabit Yollar) ---
-PK_MAP_PATH_LOCAL = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
-DECOYS_SDF_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/decoys_sdf_3'
-OUTPUT_PKL_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/all_pickles_2'
+PK_MAP_PATH_LOCAL = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
+DECOYS_SDF_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/decoys_sdf_3")
+OUTPUT_PKL_DIR = os.path.join(PLANET_ROOT, "datasets/all_pickles_2")
 DEFAULT_PK = 0.0
 
 def get_all_pdb_dirs(base_dir: str) -> List[str]:

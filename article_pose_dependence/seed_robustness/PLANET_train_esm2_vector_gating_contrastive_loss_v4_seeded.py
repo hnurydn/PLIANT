@@ -8,6 +8,9 @@ from rdkit import RDLogger
 import wandb
 from sklearn.metrics import roc_auc_score, average_precision_score, f1_score, precision_score, recall_score
 from scipy.stats import pearsonr, spearmanr
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PLANET_train_esm2_vector_gating_contrastive_loss_v4_seeded.py
@@ -16,7 +19,7 @@ from scipy.stats import pearsonr, spearmanr
 # --seed + --max_step eklendi, geri kalan mantık birebir aynı.
 # ═══════════════════════════════════════════════════════════════════════════
 
-scripts_path = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Scripts"
+scripts_path = os.path.join(PLANET_ROOT, "Scripts")
 if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
 

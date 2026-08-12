@@ -11,7 +11,7 @@ from sklearn.metrics import roc_auc_score,precision_recall_curve,auc
 from chemutils import ProteinPocket,mol_batch_to_graph,tensorize_protein_pocket
 
 # PLANET_model.py dosyasının bulunduğu dizinin yolu
-PLANET_MODEL_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Model'
+PLANET_MODEL_DIR = os.path.join(PLANET_ROOT, "Model")
 
 # Bu dizini Python'ın arama yoluna ekle
 if PLANET_MODEL_DIR not in sys.path:
@@ -19,6 +19,9 @@ if PLANET_MODEL_DIR not in sys.path:
 
 # Şimdi import et:
 from PLANET_model import PLANET
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 class VirtualScreening_Dataset(Dataset):
     def __init__(self,smi_file,batch_size=32):

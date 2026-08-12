@@ -7,14 +7,17 @@ from rdkit import Chem
 from rdkit import RDLogger
 from multiprocessing import Pool, cpu_count
 import traceback
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR ---
 # 1. Hazirladigin JSON dosyasi (DUZELTILDI: .pdb uzantili JSON kullaniliyor)
-INPUT_JSON = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_pdb.json"
+INPUT_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_pdb.json")
 # 2. Cikti klasoru
-OUTPUT_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/LIT-PCBA/lit_pcba_pkl_data"
+OUTPUT_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/LIT-PCBA/lit_pcba_pkl_data")
 # 3. Kutuphane yolu
-CHEMUTILS_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation"
+CHEMUTILS_PATH = os.path.join(PLANET_ROOT, "Dataset_preparation")
 
 # Chemutils yolunu ekle
 if CHEMUTILS_PATH not in sys.path:

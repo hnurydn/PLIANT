@@ -4,10 +4,13 @@ import pickle
 import numpy as np
 import torch
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR ---
-DATA_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_pkl_data"
-CHEMUTILS_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation"
+DATA_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_pkl_data")
+CHEMUTILS_PATH = os.path.join(PLANET_ROOT, "Dataset_preparation")
 
 if CHEMUTILS_PATH not in sys.path:
     sys.path.append(CHEMUTILS_PATH)

@@ -5,9 +5,12 @@ from tqdm import tqdm
 from torch.utils.data import Dataset
 # ESM2 uyumlu modülün
 from chemutils_esm2 import tensorize_all 
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- KESİN YOLLAR ---
-PK_MAP_JSON = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
+PK_MAP_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
 ESM_SUBDIR = "planet_esm2_pkl"
 
 class ProLigDataset(Dataset):
@@ -119,7 +122,7 @@ class ProLigDataset(Dataset):
 # --- PKL OLUŞTURUCU (MAIN) ---
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i','--index_dir', default="/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/index")
+    parser.add_argument('-i','--index_dir', default=os.path.join(PLANET_ROOT, "datasets/pdbbind2020/index"))
     args = parser.parse_args()
 
     with open(PK_MAP_JSON, 'r') as f:

@@ -5,6 +5,9 @@ from Bio import SeqIO
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 from tqdm import tqdm
+ANZU_DATA_ROOT = os.environ.get("ANZU_DATA_ROOT", ".")  # local data checkout dir
+
+
 
 # BioPython uyarılarını sustur
 warnings.filterwarnings("ignore")
@@ -14,13 +17,13 @@ warnings.filterwarnings("ignore")
 # ==========================================
 
 # 1. TRAIN SET (PDBbind) YOLLARI
-PDBBIND_JSON = "/media/ubuntu/8TB/havvanur/PDBbind_structure_map_pkd_prepared.json"
-OUTPUT_PDBBIND_FASTA = "/media/ubuntu/8TB/havvanur/pdbbind_sequences.fasta"
+PDBBIND_JSON = os.path.join(ANZU_DATA_ROOT, "PDBbind_structure_map_pkd_prepared.json")
+OUTPUT_PDBBIND_FASTA = os.path.join(ANZU_DATA_ROOT, "pdbbind_sequences.fasta")
 
 # 2. TEST SETLERİ (LIT-PCBA ve DUD-E) YOLLARI
-LIT_PCBA_JSON = "/media/ubuntu/8TB/havvanur/LIT-PCBA/lit_pcba_paths_all_pdbs.json"
-DUDE_JSON = "/media/ubuntu/8TB/havvanur/all/dude_paths_all_pdbs.json"
-OUTPUT_TEST_FASTA = "/media/ubuntu/8TB/havvanur/test_sequences_all_variants.fasta"
+LIT_PCBA_JSON = os.path.join(ANZU_DATA_ROOT, "LIT-PCBA/lit_pcba_paths_all_pdbs.json")
+DUDE_JSON = os.path.join(ANZU_DATA_ROOT, "all/dude_paths_all_pdbs.json")
+OUTPUT_TEST_FASTA = os.path.join(ANZU_DATA_ROOT, "test_sequences_all_variants.fasta")
 
 
 # ==========================================

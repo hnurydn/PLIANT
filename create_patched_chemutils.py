@@ -1,9 +1,12 @@
 import os
 import sys
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # Dosya Yolları
-ORIGINAL_FILE = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation/chemutils.py"
-NEW_FILE = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation/chemutils_dude.py"
+ORIGINAL_FILE = os.path.join(PLANET_ROOT, "Dataset_preparation/chemutils.py")
+NEW_FILE = os.path.join(PLANET_ROOT, "Dataset_preparation/chemutils_dude.py")
 
 def main():
     print(f"🔧 Orijinal dosya okunuyor: {ORIGINAL_FILE}")

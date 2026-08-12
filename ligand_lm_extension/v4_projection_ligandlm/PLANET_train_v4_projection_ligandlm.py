@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -16,7 +17,7 @@ from scipy.stats import pearsonr, spearmanr
 # --seed + --max_step eklendi, geri kalan mantık birebir aynı.
 # ═══════════════════════════════════════════════════════════════════════════
 
-scripts_path = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Scripts"
+scripts_path = os.path.dirname(os.path.abspath(__file__))
 if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
 

@@ -3,16 +3,19 @@ import numpy as np
 import pickle
 import os
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- KRİTİK AYARLAR ---
 # 1. Eğitimden gelen PCA (Buldun!)
-PCA_PKL_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/esm2_pca_params.pkl" 
+PCA_PKL_PATH = os.path.join(PLANET_ROOT, "esm2_pca_params.pkl") 
 
 # 2. Ham DUD-E H5 (1280 boyutlu olan)
-INPUT_H5 = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_esm2_embeddings.h5"
+INPUT_H5 = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_esm2_embeddings.h5")
 
 # 3. ÇIKTI: Modelin Yiyeceği Dosya (512 boyutlu olacak)
-OUTPUT_H5 = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_esm2_embeddings_PCA512.h5"
+OUTPUT_H5 = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_esm2_embeddings_PCA512.h5")
 
 def apply_pca_transform():
     print(f"\n🚀 PCA Dönüşümü Başlıyor...")

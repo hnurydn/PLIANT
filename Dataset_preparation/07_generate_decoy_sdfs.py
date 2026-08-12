@@ -10,17 +10,20 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 import json # JSON yüklemek için eklenmiştir
 import sys
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # Global olarak yüklenecek JSON verisi (Fonksiyonlar arasında paylaşım için)
 PK_DATA = {} 
 
 # --- AYARLAR ---
 # Girdi: BANANA Skorlama çıktılarının bulunduğu klasör (05. adımdan)
-BANANA_SCORES_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/banana_output_scores_filtered/'
+BANANA_SCORES_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/banana_output_scores_filtered/")
 # JSON Haritası (Prepared PDB yollarını içerir)
-PK_MAP_JSON = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
+PK_MAP_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
 # Orijinal Adaylar (SMILES'ı çekmek için)
-ORIGINAL_CANDIDATES_CSV = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/decoy_candidates_find_1000_suitable.csv"
+ORIGINAL_CANDIDATES_CSV = os.path.join(PLANET_ROOT, "datasets/decoy_candidates_find_1000_suitable.csv")
 # Bu script için ara CSV çıktısı
 INTERMEDIATE_CSV = os.path.join(os.path.dirname(PK_MAP_JSON), 'all_filtered_decoys_for_sdf.csv')
 
@@ -71,7 +74,7 @@ def combine_all_filtered_decoys():
     
     # SMILES'ı içeren orijinal aday listesi (04_prepare_decoy_candidates.sh çıktısı)
     # SMILES'ı çekmek için bu dosyayı yüklemeliyiz.
-    ORIGINAL_CANDIDATES_CSV = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/decoy_candidates_find_100_suitable.csv"
+    ORIGINAL_CANDIDATES_CSV = os.path.join(PLANET_ROOT, "datasets/decoy_candidates_find_100_suitable.csv")
     try:
         df_original = pd.read_csv(ORIGINAL_CANDIDATES_CSV)
         df_original = df_original[['binder_pdb_id', 'chembl_id', 'chembl_smiles']].drop_duplicates()

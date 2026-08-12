@@ -8,16 +8,21 @@ import numpy as np
 from rdkit import Chem
 from collections import OrderedDict
 import sys
+BANANA_ROOT = os.environ.get("BANANA_ROOT", ".")  # BANANA scoring tool install dir
+
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR ---
-POCKET_MAP_JSON = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
-DECOY_CSV = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/decoy_candidates_find_500.csv"
+POCKET_MAP_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
+DECOY_CSV = os.path.join(PLANET_ROOT, "datasets/decoy_candidates_find_500.csv")
 
-PDB_ROOT_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/'
-BANANA_POCKET_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/banana_pocket_pdbs_12A/'
-BANANA_SCORES_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/banana_output_scores_filtered_2/'
-TEMP_SMI_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/temp_smi_files/'
-BANANA_DIR = '/arf/scratch/hnaydin/banana'
+PDB_ROOT_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/")
+BANANA_POCKET_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/banana_pocket_pdbs_12A/")
+BANANA_SCORES_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/banana_output_scores_filtered_2/")
+TEMP_SMI_DIR = os.path.join(PLANET_ROOT, "temp_smi_files/")
+BANANA_DIR = BANANA_ROOT
 
 LIGAND_POCKET_CUTOFF = 12.0
 CRITICAL_THRESHOLD = -3.0

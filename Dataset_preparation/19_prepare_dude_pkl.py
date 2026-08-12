@@ -8,11 +8,14 @@ from rdkit import Chem
 from rdkit import RDLogger
 from multiprocessing import Pool, cpu_count
 import traceback
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR ---
-INPUT_JSON = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_paths_prepared_arf.json"
-OUTPUT_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_pkl_data"
-CHEMUTILS_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation"
+INPUT_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_paths_prepared_arf.json")
+OUTPUT_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_pkl_data")
+CHEMUTILS_PATH = os.path.join(PLANET_ROOT, "Dataset_preparation")
 
 # Chemutils yolunu ekle
 if CHEMUTILS_PATH not in sys.path:

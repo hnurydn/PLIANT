@@ -8,17 +8,20 @@ import sys
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR (Burayı kendi yollarına göre teyit et) ---
 # --- AYARLAR (Burayı kendi yollarına göre teyit et) ---
-BANANA_SCORES_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/banana_output_scores_filtered_3/'
-PK_MAP_JSON = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
-ORIGINAL_CANDIDATES_CSV = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/decoy_candidates_all.csv"
-FINAL_INDEX_CSV = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/decoy_generation_summary_index.csv'
+BANANA_SCORES_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/banana_output_scores_filtered_3/")
+PK_MAP_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
+ORIGINAL_CANDIDATES_CSV = os.path.join(PLANET_ROOT, "datasets/decoy_candidates_all.csv")
+FINAL_INDEX_CSV = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/decoy_generation_summary_index.csv")
 DEFAULT_N_JOBS = 10 
 # --- AYARLAR ---
 # Yeni eklenecek satır:
-DECOYS_OUTPUT_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/decoys_sdf_3'
+DECOYS_OUTPUT_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/decoys_sdf_3")
 os.makedirs(DECOYS_OUTPUT_DIR, exist_ok=True)
 # Global değişken (Process'ler arası paylaşım için)
 PK_DATA = {}

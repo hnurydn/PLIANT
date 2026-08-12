@@ -21,9 +21,9 @@ Kritik tasarım kararı: sadece ligand.mol'ün konformerini bozuyoruz, pro_lig_i
 
 Kullanım (önce küçük bir --limit ile deneyin, kalibrasyon raporunu kontrol edin):
     python pose_perturbation.py \
-        --core-lmdb /arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/lmdb_planet/core.lmdb \
-        --out-dir   /arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pose_perturbation \
-        --chemutils-path /arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Scripts \
+        --core-lmdb $PLANET_ROOT/datasets/pdbbind2020/lmdb_planet/core.lmdb \
+        --out-dir   $PLANET_ROOT/datasets/pose_perturbation \
+        --chemutils-path $PLANET_ROOT/Scripts \
         --rmsd-targets 0,1,2,3,4 \
         --mode rigid \
         --n-replicates 1 \
@@ -48,6 +48,9 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import rdMolTransforms
 from scipy.spatial.transform import Rotation
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 
 # ───────────────────────────── Geometri yardımcıları ─────────────────────────────

@@ -3,26 +3,29 @@ import subprocess
 import pandas as pd
 import shutil
 import re
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # ==========================================
 #               AYARLAR
 # ==========================================
 
 # Dosya Yolları (Önceki adımlardan gelenler)
-TRAIN_FASTA = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind_sequences.fasta"
-TEST_FASTA = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/test_sequences_all_variants.fasta"
+TRAIN_FASTA = os.path.join(PLANET_ROOT, "datasets/pdbbind_sequences.fasta")
+TEST_FASTA = os.path.join(PLANET_ROOT, "datasets/test_sequences_all_variants.fasta")
 
 # CSV Dosyaları
-INPUT_TRAIN_CSV = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/PDBbind_structure_map_pkd_prepared.json" 
+INPUT_TRAIN_CSV = os.path.join(PLANET_ROOT, "datasets/PDBbind_structure_map_pkd_prepared.json") 
 # NOT: TrainSet.csv dosyanın asıl yerini buraya yazmalısın. 
 # Genelde: .../datasets/pdbbind2020/index/TrainSet.csv olur.
 # Eğer o yoksa JSON'dan filtreleyip yeni CSV üreteceğiz.
-TRAIN_CSV_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/index/TrainSet.csv"
+TRAIN_CSV_PATH = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/index/TrainSet.csv")
 
 # Çıktılar
-CDHIT_OUT = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/train_overlaps"  # CD-HIT sonuç dosyası adı
-FINAL_TRAIN_CSV = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/TrainSet_Strict_Cleaned.csv"
-LEAKAGE_REPORT = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/leakage_report.txt"
+CDHIT_OUT = os.path.join(PLANET_ROOT, "datasets/train_overlaps")  # CD-HIT sonuç dosyası adı
+FINAL_TRAIN_CSV = os.path.join(PLANET_ROOT, "datasets/TrainSet_Strict_Cleaned.csv")
+LEAKAGE_REPORT = os.path.join(PLANET_ROOT, "datasets/leakage_report.txt")
 
 '''# Parametreler
     """CD-HIT yüklü mü kontrol eder."""

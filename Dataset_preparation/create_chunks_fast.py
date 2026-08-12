@@ -4,17 +4,17 @@ from tqdm import tqdm
 from multiprocessing import Pool
 
 # --- 1. MODÜL YÖNLENDİRMESİ ---
-sys.path.append("/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation")
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import chemutils_esm2_vector as chemutils
 sys.modules['chemutils'] = chemutils
 
 # --- 2. YOLLAR ---
-INDEX_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/index/"
-ESM2_STORAGE_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/planet_esm2_pkl"
-PK_MAP_JSON = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
+INDEX_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/index/")
+ESM2_STORAGE_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/planet_esm2_pkl")
+PK_MAP_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
 
 # YENİ HEDEF KLASÖRÜMÜZ (Saf Tensörler Burada Birikecek)
-TENSOR_OUT_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/planet_tensors"
+TENSOR_OUT_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/planet_tensors")
 os.makedirs(TENSOR_OUT_DIR, exist_ok=True)
 
 def process_pdb(args):
@@ -120,9 +120,9 @@ if __name__ == "__main__":
 from tqdm import tqdm
 
 # --- YOLLAR ---
-TENSOR_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/planet_tensors"
-CHUNK_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/planet_tensor_chunks"
-INDEX_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/index"
+TENSOR_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/planet_tensors")
+CHUNK_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/planet_tensor_chunks")
+INDEX_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/index")
 
 os.makedirs(CHUNK_DIR, exist_ok=True)
 
@@ -180,8 +180,8 @@ if __name__ == "__main__":
 """import os, torch, math
 from tqdm import tqdm
 
-SOURCE_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/planet_tensors/train"
-SAVE_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/planet_tensors/shards"
+SOURCE_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/planet_tensors/train")
+SAVE_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/planet_tensors/shards")
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 files = [f for f in os.listdir(SOURCE_DIR) if f.endswith('.pt')]
@@ -218,13 +218,16 @@ import pandas as pd
 from tqdm import tqdm
 from multiprocessing import Pool
 
-sys.path.append("/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation")
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import chemutils_esm2_vector as chemutils
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 sys.modules['chemutils'] = chemutils
 
-ESM2_DIR  = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/planet_esm2_pkl"
-OUT_DIR   = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/planet_tensors/valid"
-INDEX_CSV = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/index/ValidSet.csv"
+ESM2_DIR  = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/planet_esm2_pkl")
+OUT_DIR   = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/planet_tensors/valid")
+INDEX_CSV = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/index/ValidSet.csv")
 
 os.makedirs(OUT_DIR, exist_ok=True)
 

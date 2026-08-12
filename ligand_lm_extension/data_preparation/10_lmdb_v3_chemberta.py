@@ -17,13 +17,16 @@ from tqdm import tqdm
 from rdkit import Chem
 from rdkit import RDLogger
 from transformers import AutoTokenizer, AutoModel
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 RDLogger.DisableLog("rdApp.*")
 
-sys.path.insert(0, "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-SRC_ROOT = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/lmdb_planet_v2"
-DST_ROOT = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/lmdb_planet_v3"
+SRC_ROOT = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/lmdb_planet_v2")
+DST_ROOT = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/lmdb_planet_v3")
 SPLITS = ["core", "valid", "train"]  # kucukten buyuge, erken geri bildirim icin
 
 MODEL_NAME = "seyonec/ChemBERTa-zinc-base-v1"

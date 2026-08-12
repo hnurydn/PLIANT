@@ -5,6 +5,9 @@ from Bio import SeqIO
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # BioPython uyarılarını sustur
 warnings.filterwarnings("ignore")
@@ -14,11 +17,11 @@ warnings.filterwarnings("ignore")
 # ==========================================
 
 # JSON Dosya Yolları (Senin verdiğin yollar)
-LIT_PCBA_JSON = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_arf.json"
-DUDE_JSON = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_paths_prepared_arf.json"
+LIT_PCBA_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_arf.json")
+DUDE_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_paths_prepared_arf.json")
 
 # Çıktı Dosyası
-OUTPUT_TEST_FASTA = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/test_sequences_for_esm2.fasta"
+OUTPUT_TEST_FASTA = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/test_sequences_for_esm2.fasta")
 
 # ==========================================
 #           YARDIMCI FONKSİYONLAR

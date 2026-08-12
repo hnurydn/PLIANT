@@ -4,6 +4,9 @@ import pickle
 import sys
 from multiprocessing import Pool
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 # --- Kütüphane Yükleme ---
 try:
     from rdkit import Chem
@@ -21,7 +24,7 @@ except ImportError as e:
 #              AYARLAR
 # ==========================================
 # Referans JSON dosyan
-JSON_PATH = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
+JSON_PATH = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
 
 # Çekirdek Sayısı (Sunucuyu yormadan hızlı bitmesi için)
 N_JOBS = 20

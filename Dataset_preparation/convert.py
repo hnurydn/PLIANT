@@ -4,8 +4,11 @@ build_lmdb_from_pickles.py
 
 import os, pickle, lmdb, json, argparse
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
 
-INDEX_DIR   = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/index'
+
+
+INDEX_DIR   = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/index")
 MAP_SIZE_GB = 500
 
 def build_set(set_name, out_dir):

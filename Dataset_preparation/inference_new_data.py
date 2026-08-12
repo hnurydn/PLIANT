@@ -7,10 +7,10 @@ import os
 # Aşağıdaki kodlarla ona "Şu klasörlere de bak, orada aradığım dosyalar var" diyoruz.
 
 # 1. PLANET_model.py ve layers.py'nin olduğu klasör:
-sys.path.append('/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Model')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # 2. chemutils.py'nin olduğu klasör:
-sys.path.append('/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # ------------------------------------------------
 
 import torch

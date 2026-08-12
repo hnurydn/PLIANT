@@ -6,10 +6,13 @@ from sklearn.decomposition import PCA
 import pickle
 import os
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- PARAMETRELER ---
-HDF5_YOLU = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020_esm2_embeddings_v2.h5' # Lütfen HDF5 dosyanızın adını buraya girin
-CIKTI_YOLU = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/esm2_pca_params_dude.pkl'
+HDF5_YOLU = os.path.join(PLANET_ROOT, "datasets/pdbbind2020_esm2_embeddings_v2.h5") # Lütfen HDF5 dosyanızın adını buraya girin
+CIKTI_YOLU = os.path.join(PLANET_ROOT, "esm2_pca_params_dude.pkl")
 HEDEF_BOYUT = 512 # 1280D'den 512D'ye düşürme, GNN için standart ve güvenli bir boyut
 
 def calculate_pca_whitening_params(h5_path, output_path, target_dim):

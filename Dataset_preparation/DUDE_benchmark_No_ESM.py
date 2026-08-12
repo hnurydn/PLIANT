@@ -15,10 +15,13 @@ from collections import defaultdict
 import pickle
 import random
 import re
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- PATH AYARLARI ---
-MODEL_DIR_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Model" 
-DEFAULT_JSON_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_paths_prepared_arf.json"
+MODEL_DIR_PATH = os.path.join(PLANET_ROOT, "Model") 
+DEFAULT_JSON_PATH = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_paths_prepared_arf.json")
 
 if MODEL_DIR_PATH not in sys.path: 
     sys.path.append(MODEL_DIR_PATH)

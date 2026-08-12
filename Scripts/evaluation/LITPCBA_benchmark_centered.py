@@ -37,6 +37,9 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import roc_auc_score, precision_recall_curve, auc
 from rdkit import Chem, RDLogger
 import wandb
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 RDLogger.DisableLog('rdApp.*')
 
@@ -57,7 +60,7 @@ class LitPcbaPocketRecord:
 # ──────────────────────────────────────────────
 # MODEL IMPORT  (model_type'a göre seçilir)
 # ──────────────────────────────────────────────
-MODEL_DIR_PATH = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Model'
+MODEL_DIR_PATH = os.path.join(PLANET_ROOT, "Model")
 if MODEL_DIR_PATH not in sys.path:
     sys.path.append(MODEL_DIR_PATH)
 

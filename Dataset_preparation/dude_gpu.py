@@ -8,10 +8,13 @@ import rdkit.Chem as Chem
 from tqdm import tqdm
 import json
 import gzip
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- PATH SETUP ---
-PLANET_MODEL_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Model'
-DEFAULT_JSON_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_paths_prepared_arf.json"
+PLANET_MODEL_DIR = os.path.join(PLANET_ROOT, "Model")
+DEFAULT_JSON_PATH = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_paths_prepared_arf.json")
 
 if PLANET_MODEL_DIR not in sys.path:
     sys.path.append(PLANET_MODEL_DIR)

@@ -24,12 +24,15 @@ except Exception:
     fast = False
 
 from huggingface_hub import HfApi
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 TOKEN = os.environ.get("HF_TOKEN")
 REPO = "hnurydn/PLANET-datasets"
 PATH_IN_REPO = "checkpoints_article_pose_dependence"
 
-BASE = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model"
+BASE = PLANET_ROOT
 STAGE = "/arf/scratch/hnaydin/PLANET_ORIGINAL/hf_checkpoint_staging"
 
 # source dir (relative to BASE) -> canonical model name used throughout the

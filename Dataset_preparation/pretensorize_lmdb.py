@@ -13,7 +13,7 @@ import torch
 from multiprocessing import Pool
 from tqdm import tqdm
 
-sys.path.insert(0, '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from chemutils_esm2_vector import tensorize_all
 
 MAP_SIZE_GB = 100

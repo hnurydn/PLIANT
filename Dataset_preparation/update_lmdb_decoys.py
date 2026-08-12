@@ -4,8 +4,11 @@ Belirtilen PDB listesi için LMDB'deki binder objelerinin decoy listesini günce
 """
 import os, pickle, lmdb, json, argparse
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
 
-ALL_PICKLES_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/all_pickles_2'
+
+
+ALL_PICKLES_DIR = os.path.join(PLANET_ROOT, "datasets/all_pickles_2")
 
 def update_set(set_name, lmdb_dir, target_pdb_ids):
     lmdb_path = os.path.join(lmdb_dir, f'{set_name}.lmdb')

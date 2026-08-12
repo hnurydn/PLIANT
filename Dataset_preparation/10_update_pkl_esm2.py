@@ -9,19 +9,22 @@ from functools import partial
 import sys
 from sklearn.decomposition import PCA 
 import glob 
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # =======================================================
 # PARAMETRELER
 # =======================================================
-ESM2_H5_PATH = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/pdbbind2020_esm2_embeddings_v2.h5' 
-PCA_PARAMS_PATH = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/esm2_pca_params.pkl' 
+ESM2_H5_PATH = os.path.join(PLANET_ROOT, "pdbbind2020_esm2_embeddings_v2.h5") 
+PCA_PARAMS_PATH = os.path.join(PLANET_ROOT, "esm2_pca_params.pkl") 
 HEDEF_BOYUT = 512
 
-PDBBIND_KOK_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020"
+PDBBIND_KOK_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020")
 PDB_MAP_JSON = os.path.join(PDBBIND_KOK_DIR, "PDBbind_structure_map_pkd_prepared.json")
 
-ALL_PICKLES_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/all_pickles'
-ESM_OUTPUT_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/all_pickles_esm'
+ALL_PICKLES_DIR = os.path.join(PLANET_ROOT, "datasets/all_pickles")
+ESM_OUTPUT_DIR = os.path.join(PLANET_ROOT, "datasets/all_pickles_esm")
 
 N_JOBS = 40 
 

@@ -4,10 +4,13 @@ import json
 import glob
 import math
 import re
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- Yapılandırma ---
 # İŞİN ÇALIŞTIĞI ANA DİZİN (Scratch)
-BASE_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020"
+BASE_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020")
 # Yeni JSON dosyasının adı
 OUTPUT_JSON = os.path.join(BASE_DIR, "PDBbind_structure_map_pkd_prepared.json")
 # PDBbind index dosyasının yolu (index klasöründe olduğunu varsayıyoruz)

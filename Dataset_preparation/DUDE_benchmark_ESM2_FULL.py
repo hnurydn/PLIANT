@@ -16,11 +16,14 @@ from collections import defaultdict
 import traceback
 import pickle
 import random
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- PATH AYARLARI ---
-MODEL_DIR_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Model" 
-JSON_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/dude/dude_paths_prepared_arf.json"
-PCA_PARAMS_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/esm2_pca_params.pkl" # PCA Dosyası
+MODEL_DIR_PATH = os.path.join(PLANET_ROOT, "Model") 
+JSON_PATH = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/dude/dude_paths_prepared_arf.json")
+PCA_PARAMS_PATH = os.path.join(PLANET_ROOT, "esm2_pca_params.pkl") # PCA Dosyası
 
 if MODEL_DIR_PATH not in sys.path: sys.path.append(MODEL_DIR_PATH)
 

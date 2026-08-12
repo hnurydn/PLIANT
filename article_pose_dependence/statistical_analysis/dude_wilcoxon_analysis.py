@@ -14,7 +14,7 @@ Makale icin bu bosluk dolduruldu -- ve DUD-E'nin cok daha yuksek istatistiksel
 gucu (101 vs 15 hedef) LIT-PCBA'dan FARKLI, daha zengin bir tablo ortaya cikardi
 (7/10 model anlamli, LIT-PCBA'da sadece 1/10).
 
-Veri kaynagi: /arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/dude_results_centered/
+Veri kaynagi: $PLANET_ROOT/dude_results_centered/
 (indirilmis kopya: makale/dude_results_centered/), her model icin 101 satir
 (Target, ROC_AUC, PR_AUC, n_actives, n_decoys, EF_0.5/1/2/5%).
 """
@@ -25,6 +25,9 @@ import os
 
 import numpy as np
 from scipy.stats import wilcoxon
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dude_results_centered")
 

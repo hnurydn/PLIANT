@@ -2,9 +2,12 @@ import os
 import pickle
 from tqdm import tqdm
 from multiprocessing import Pool
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR ---
-DATA_DIR = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/all_pickles/'
+DATA_DIR = os.path.join(PLANET_ROOT, "datasets/all_pickles/")
 N_JOBS = 32 # Arf cluster üzerinde paralel işlem için ideal
 
 def reformat_and_index_decoys(file_name):

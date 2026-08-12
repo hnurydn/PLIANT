@@ -6,10 +6,13 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import roc_auc_score
 from rdkit import Chem, RDLogger
 from collections import defaultdict
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- 1. PROJE YOLU VE MODÜL AYARLARI ---
-MODEL_DIR_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Model" 
-DEFAULT_JSON_PATH = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_arf.json"
+MODEL_DIR_PATH = os.path.join(PLANET_ROOT, "Model") 
+DEFAULT_JSON_PATH = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/LIT-PCBA/lit_pcba_paths_prepared_arf.json")
 
 if MODEL_DIR_PATH not in sys.path: 
     sys.path.append(MODEL_DIR_PATH)

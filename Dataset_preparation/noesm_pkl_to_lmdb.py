@@ -10,13 +10,16 @@ Kullanım:
 """
 
 import sys, pickle, lmdb, os, json
-sys.path.insert(0, '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Dataset_preparation/')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # ─── AYARLAR ──────────────────────────────────────────────────────────────────
-INDEX_DIR   = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/index'
-OUT_DIR     = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/lmdb_noesm'
+INDEX_DIR   = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/index")
+OUT_DIR     = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/lmdb_noesm")
 MAP_SIZE_GB = 350
 MAX_DECOY   = 100
 # ──────────────────────────────────────────────────────────────────────────────

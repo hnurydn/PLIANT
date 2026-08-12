@@ -5,10 +5,13 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 import os
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- Ayarlar ---
-JSON_MAP_PATH = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd.json'
-OUTPUT_CSV_PATH = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/binder_properties.csv'
+JSON_MAP_PATH = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd.json")
+OUTPUT_CSV_PATH = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/binder_properties.csv")
 # ----------------
 
 def get_ligand_properties(mol):

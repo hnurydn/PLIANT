@@ -8,10 +8,13 @@ import multiprocessing
 import pickle
 import time
 import random
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- AYARLAR ---
 # Genel Ana Dizin (BASE_DIR'in kendisi)
-BASE_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets"
+BASE_DIR = os.path.join(PLANET_ROOT, "datasets")
 
 # Girdiler
 CHEMBL_SDF = os.path.join(BASE_DIR, "chembl_29.sdf")

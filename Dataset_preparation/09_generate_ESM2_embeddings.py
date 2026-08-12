@@ -10,6 +10,9 @@ import h5py
 from tqdm import tqdm
 import warnings
 from typing import List, Tuple
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # HDF5'in string uyarılarını ve PyTorch'un non-persistent uyarılarını bastır
 # warnings.filterwarnings("ignore", category=h5py.h5t.UnrecognizedTypeWarning)
@@ -17,7 +20,7 @@ from typing import List, Tuple
 
 # --- AYARLAR ---
 # PDBbind harita dosyanızın yolunu güncelleyin
-DEFAULT_INPUT_JSON = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json"
+DEFAULT_INPUT_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
 OUTPUT_H5_FILE = 'pdbbind2020_esm2_embeddings_v2.h5'
 PDB_ID_LIST_FILE = 'pdbbind2020_pdb_ids.txt' # İşlenen PDB ID'lerini tutmak için
 

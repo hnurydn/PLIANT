@@ -1,10 +1,14 @@
 import json
 import pandas as pd
 import sys
+import os
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- Dosya Yolları ---
-POCKET_MAP_JSON = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
-DECOY_CSV = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/decoy_candidates_find_100_suitable.csv"
+POCKET_MAP_JSON = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
+DECOY_CSV = os.path.join(PLANET_ROOT, "datasets/decoy_candidates_find_100_suitable.csv")
 
 def find_missing_ids(json_path, csv_path):
     """

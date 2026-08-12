@@ -10,6 +10,9 @@ from typing import List, Tuple
 import gzip 
 import numpy as np # NumPy import'u eklendi
 import torch # Torch import'u eklendi
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # --- RDKit ve Kütüphane Yükleme ---
 try:
@@ -536,7 +539,7 @@ def main():
     # Argparse yerine kullanılan sabit değerler:
     class Args:
         # LÜTFEN BU YOLLARI KENDİ YAPINIZA GÖRE GÜNCELLEYİN!
-        dud_e_dir = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets" 
+        dud_e_dir = os.path.join(PLANET_ROOT, "datasets") 
         output_path = "DUD_E_test_records.pkl"
         njobs = 48 # Kullanmak istediğiniz CPU çekirdek sayısı
     args = Args()

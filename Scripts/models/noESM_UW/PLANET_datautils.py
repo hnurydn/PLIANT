@@ -3,8 +3,11 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from chemutils import tensorize_protein_pocket, tensorize_ligand
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
 
-PK_MAP_PATH_LOCAL = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
+
+
+PK_MAP_PATH_LOCAL = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
 
 
 class ProLigDataset(Dataset):

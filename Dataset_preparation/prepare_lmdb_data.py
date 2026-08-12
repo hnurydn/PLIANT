@@ -2,6 +2,9 @@ import lmdb
 import os
 import pickle
 from tqdm import tqdm
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 def create_lmdb(data_path, lmdb_path):
     # Yaklaşık 500GB yer ayırıyoruz (HPC'de disk kotana dikkat et)
@@ -41,4 +44,4 @@ def create_lmdb(data_path, lmdb_path):
     print("✅ LMDB Kasası Hazır!")
 
 # Kullanım:
-create_lmdb('/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020', 'pdbbind_fast.lmdb')
+create_lmdb(os.path.join(PLANET_ROOT, "datasets/pdbbind2020"), 'pdbbind_fast.lmdb')

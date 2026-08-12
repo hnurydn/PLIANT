@@ -5,9 +5,12 @@ from tqdm import tqdm
 from torch.utils.data import Dataset
 # Kendi modüllerin (Aynı dizinde olduğu varsayılıyor)
 from chemutils import ComplexPocket, tensorize_all
+PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / data checkout
+
+
 
 # JSON dosyasının yolu
-PK_MAP_PATH_LOCAL = '/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json'
+PK_MAP_PATH_LOCAL = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
 
 class ProLigDataset(Dataset):
     def __init__(self, data_pickle_path, batch_size, shuffle=True, decoy_flag=True, binder_per_batch=4):
@@ -136,7 +139,7 @@ def main():
     args = parser.parse_args()
 
     # Dosyaların gerçekte toplandığı yer
-    ALL_PICKLES_DIR = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/all_pickles"
+    ALL_PICKLES_DIR = os.path.join(PLANET_ROOT, "datasets/all_pickles")
 
     with open(PK_MAP_PATH_LOCAL, 'r') as f:
         pk_data_map = json.load(f)
