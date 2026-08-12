@@ -3,23 +3,26 @@
 """
 pose_perturbation.py
 =====================
-CASF-2016 core-set kompleksleri için kontrollü RMSD'li ligand poz bozulması üretir.
-Amaç: PLANET modellerinin (özellikle Vector-Gating ailesi) crystal-pose'dan uzaklaştıkça
-afinite/temas tahmin kalitesinin ne kadar bozulduğunu ölçmek (bkz.
+Generates controlled, RMSD-graded ligand pose perturbations for CASF-2016
+core-set complexes. Goal: measure how much affinity/contact prediction
+quality degrades for PLANET models (particularly the Vector-Gating family)
+as the input pose moves away from the crystal pose (see
 makale/pose_perturbation_teknik_tasarim.md).
 
-Girdi:  core.lmdb (chemutils.ComplexPocket kayıtları; anahtar = pdb_id)
-Çıktı:  her RMSD bin'i için ayrı bir LMDB (core_rmsd{R}.lmdb), + kalibrasyon
-        QC raporu (CSV). Çıktı LMDB'ler mevcut eval script'i tarafından (eval_unified.py /
-        PLANET_re-evaluate_*) HİÇBİR KOD DEĞİŞİKLİĞİ GEREKTİRMEDEN okunabilir — sadece
-        ligand.mol'ün 3D konformer koordinatları değişti, geri kalan her şey
-        (pro_lig_interaction etiketi, pocket_residues, pK) NATIVE/gerçek kalıyor.
+Input:  core.lmdb (chemutils.ComplexPocket records; key = pdb_id)
+Output: one LMDB per RMSD bin (core_rmsd{R}.lmdb), plus a calibration QC
+        report (CSV). The output LMDBs can be read by the existing eval
+        scripts (eval_unified.py / PLANET_re-evaluate_*) WITH NO CODE CHANGES
+        AT ALL — only the 3D conformer coordinates of ligand.mol change,
+        everything else (the pro_lig_interaction label, pocket_residues, pK)
+        stays NATIVE/ground-truth.
 
-Kritik tasarım kararı: sadece ligand.mol'ün konformerini bozuyoruz, pro_lig_interaction
-(gerçek temas haritası) ve pK (gerçek afinite) değişmiyor — çünkü ölçmek istediğimiz şey
-"modele yanlış poz verilince gerçek/native cevabı hâlâ tahmin edebiliyor mu" sorusu.
+Key design decision: only the conformer of ligand.mol is perturbed;
+pro_lig_interaction (the true contact map) and pK (the true affinity) are
+left unchanged — because the question being asked is "given a wrong pose,
+can the model still predict the true/native answer?"
 
-Kullanım (önce küçük bir --limit ile deneyin, kalibrasyon raporunu kontrol edin):
+Usage (try a small --limit first and check the calibration report):
     python pose_perturbation.py \
         --core-lmdb $PLANET_ROOT/datasets/pdbbind2020/lmdb_planet/core.lmdb \
         --out-dir   $PLANET_ROOT/datasets/pose_perturbation \
@@ -28,9 +31,9 @@ Kullanım (önce küçük bir --limit ile deneyin, kalibrasyon raporunu kontrol 
         --mode rigid \
         --n-replicates 1 \
         --seed 42 \
-        --limit 5          # ilk deneme için; tam koşuda kaldırın
+        --limit 5          # for the first trial; remove for the full run
 
-Gereken paketler (pocketgen conda env'inde hepsi mevcut, TRUBA'da doğrulandı):
+Required packages (all present in the pocketgen conda env, verified on TRUBA):
     rdkit, scipy, numpy, lmdb
 """
 

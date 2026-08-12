@@ -1,4 +1,4 @@
-# PLANET_train.py (DÜZENLENMİŞ)
+# PLANET_train.py (edited)
 import torch
 import torch.nn as nn
 import torch.optim as optim

@@ -1,27 +1,27 @@
 """
 PLANET_finetune_crossdocked.py
 ================================
-CrossDocked 2020 verisiyle ESM_VG modelini fine-tune eder.
+Fine-tunes the ESM_VG model on CrossDocked 2020 data.
 
-PDBbind train script'inden farkları:
-  - CrossDockedDataset kullanır (pocket bazlı 12 binder/batch)
-  - Validation/test için PDBbind core LMDB kullanır (genelleşme takibi)
-  - --freeze_affinity flag'i: affinity loss'u kapatır (sadece contact map)
-  - Sıfırdan init yok — checkpoint'ten yükler (fine-tune)
-  - beta=1.0 baştan (anneal yok — fine-tune'da warm-up gerekmez)
-  - LR çok daha düşük (1e-5 default)
+Differences from the PDBbind training script:
+  - uses CrossDockedDataset (12 binders/batch, grouped by pocket)
+  - uses the PDBbind core LMDB for validation/test (tracks generalization)
+  - --freeze_affinity flag: disables the affinity loss (contact map only)
+  - no from-scratch init -- loads from a checkpoint (fine-tuning)
+  - beta=1.0 from the start (no annealing -- fine-tuning doesn't need warm-up)
+  - much lower LR (1e-5 default)
 
-Kullanım:
-    # Affinity loss AÇIK:
+Usage:
+    # with affinity loss ON:
     python PLANET_finetune_crossdocked.py \
-        --train /arf/.../lmdb_crossdocked/train.lmdb \
-        --valid /arf/.../lmdb_planet_v2/valid.lmdb \
-        --test  /arf/.../lmdb_planet_v2/core.lmdb \
-        --save_dir /arf/.../checkpoints/esm_vg_crossdocked_aff \
-        --load_checkpoint /arf/.../ESM_VG/PLANET.iter-1900000 \
+        --train $PLANET_ROOT/.../lmdb_crossdocked/train.lmdb \
+        --valid $PLANET_ROOT/.../lmdb_planet_v2/valid.lmdb \
+        --test  $PLANET_ROOT/.../lmdb_planet_v2/core.lmdb \
+        --save_dir $PLANET_ROOT/.../checkpoints/esm_vg_crossdocked_aff \
+        --load_checkpoint $PLANET_ROOT/.../ESM_VG/PLANET.iter-1900000 \
         --epoch 50 --lr 1e-5
 
-    # Affinity loss KAPALI:
+    # with affinity loss OFF:
     python PLANET_finetune_crossdocked.py \
         ... --freeze_affinity
 """

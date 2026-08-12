@@ -1,19 +1,19 @@
 """
 prepare_benchmark_proteins.py
 ==============================
-DUDE ve LIT-PCBA protein PDB dosyalarını PDBFixer ile hazırlar.
-Hazırlanan dosyalar orijinal ile aynı klasöre _prepared.pdb olarak kaydedilir.
-JSON haritası güncellenerek protein_pdb → protein_prepared_pdb eklenir.
+Prepares DUD-E and LIT-PCBA protein PDB files with PDBFixer.
+Prepared files are saved as _prepared.pdb next to the originals.
+The JSON map is updated with a protein_pdb -> protein_prepared_pdb entry.
 
-Kullanım:
+Usage:
     python prepare_benchmark_proteins.py \
         --benchmark dude \
-        --json_path /arf/.../dude_paths_prepared_arf.json \
+        --json_path $PLANET_ROOT/.../dude_paths_prepared_arf.json \
         --njobs 20
 
     python prepare_benchmark_proteins.py \
         --benchmark litpcba \
-        --json_path /arf/.../lit_pcba_paths_prepared_arf.json \
+        --json_path $PLANET_ROOT/.../lit_pcba_paths_prepared_arf.json \
         --njobs 20
 """
 

@@ -1,7 +1,7 @@
 """
 DUDE_benchmark_unified.py
 ==========================
-DUDE benchmark — tüm model tipleri desteklenir.
+DUD-E benchmark -- supports all model types.
 --model_type: noesm | esm | vg | contrastive
 """
 

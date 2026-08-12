@@ -1,6 +1,6 @@
 """
 update_lmdb_decoys.py
-Belirtilen PDB listesi için LMDB'deki binder objelerinin decoy listesini günceller.
+Updates the decoy list of the binder objects in the LMDB for a given list of PDB IDs.
 """
 import os, pickle, lmdb, json, argparse
 from tqdm import tqdm

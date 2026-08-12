@@ -7,9 +7,9 @@ from sklearn.metrics import (roc_auc_score, average_precision_score,
                              f1_score, precision_score, recall_score, roc_curve)
 from scipy.stats import pearsonr
 
-# ─── Dinamik import: --model_type argümanına göre ─────────────────────────────
-# argparse henüz parse edilmeden önce sys.argv'den model_type'ı çekiyoruz
-# çünkü import'lar modül seviyesinde olması gerekiyor.
+# ─── Dynamic import based on the --model_type argument ───────────────────────
+# We pull model_type from sys.argv before argparse has run, because the
+# imports need to happen at module level.
 def _get_model_type_early():
     for i, arg in enumerate(sys.argv):
         if arg == '--model_type' and i + 1 < len(sys.argv):

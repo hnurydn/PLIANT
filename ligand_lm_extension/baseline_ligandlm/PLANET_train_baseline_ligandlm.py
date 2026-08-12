@@ -13,11 +13,11 @@ from sklearn.metrics import roc_auc_score, average_precision_score, f1_score, pr
 from scipy.stats import pearsonr, spearmanr
 
 # ═══════════════════════════════════════════════════════════════════════════
-# PLANET_train_noESM_noUW_seeded.py
-# Orijinal Scripts/PLANET_train_noESM_noUW.py'nin (GERÇEK üretim script'i --
-# Model/ klasöründeki eski/farklı kopya DEĞİL) SEED-KONTROLLÜ + MAX_STEP'li
-# kopyası. Degisiklikler: --seed + --max_step eklendi, geri kalan mantik
-# birebir ayni.
+# PLANET_train_baseline_ligandlm.py
+# Training script for the baseline (NoESM_NoUW) + ligand-LM (ChemBERTa) model.
+# Adapted from the seed-robustness copy of Scripts/PLANET_train_noESM_noUW.py;
+# uses PLANET_datautils_ligandlm / PLANET_model_ligandlm (7-element mol_batch
+# with the ChemBERTa embedding) and logs to the PLANET_LIGAND_LM WandB project.
 # ═══════════════════════════════════════════════════════════════════════════
 
 scripts_path = os.path.dirname(os.path.abspath(__file__))

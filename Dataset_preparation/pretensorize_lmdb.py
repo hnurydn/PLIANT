@@ -1,10 +1,10 @@
 """
 pretensorize_lmdb.py
 ====================
-Mevcut LMDB'deki her ComplexPocket objesini tensorize edip
-yeni bir LMDB'ye yazar.
+Tensorizes every ComplexPocket object in an existing LMDB and writes the
+result into a new LMDB.
 
-Kullanım:
+Usage:
     python pretensorize_lmdb.py --input train.lmdb --output train_tensor.lmdb --njobs 40
 """
 

@@ -1,68 +1,78 @@
 # PLANET + Ligand Language Model Extension
 
-Tez/JCIM makalesindeki 10 model varyantına 11. bir varyant ekleme çalışması:
-ligand tarafına **ChemBERTa** (SMILES tabanlı dil modeli) embedding'i ekleyip,
-CMG (Cross-Modal Gating) ile aynı desende `LigandLMGate` modülüyle mevcut
-`LigandGAT` çıktısına karıştırıyoruz. Amaç: protein tarafını zenginleştirmenin
-(ESM-2) yaptığı gibi, ligand tarafını zenginleştirmek de pose-bağımsız
-genelleşme açığını kapatıyor mu, sorusunu test etmek.
+An extension adding an 11th model variant to the 10 model variants compared
+in the thesis/JCIM article: a **ChemBERTa** (SMILES-based language model)
+embedding is added on the ligand side, fused into the existing `LigandGAT`
+output via a `LigandLMGate` module using the same Cross-Modal Gating (CMG)
+pattern already used on the protein side. Goal: test whether enriching the
+ligand side (mirroring what ESM-2 does for the protein side) also closes the
+pose-independent generalization gap identified in the article.
 
-Bu klasördeki her şey **3 temsilci model** için hazırlandı (10 modelin
-hepsi değil — gerekçe: baseline/ESM_VG/v4_Projection zaten pose-perturbation
-deneyinde kullanılan aynı 3 model, 4 mimari ekseni kapsıyor, kaynak/süre
-maliyeti 10 modelin ~%30'u):
+Everything here targets **3 representative models** (not all 10) — rationale:
+baseline/ESM_VG/v4_Projection are the same 3 models already used in the
+pose-perturbation experiment, spanning all 4 architectural axes, at ~30% of
+the cost/time of covering all 10:
 
-| Model | Klasör | Temel mimari dosyası (repo'nun geri kalanında, değiştirilmedi) |
+| Model | Folder | Base architecture file (elsewhere in the repo, unmodified) |
 |---|---|---|
-| Baseline (NoESM_NoUW) | `baseline_ligandlm/` | `Scripts/layers.py` |
-| ESM_VG | `esm_vg_ligandlm/` | `Scripts/layers_esm2_vector_gating.py` |
-| v4_Projection | `v4_projection_ligandlm/` | `Scripts/layers_esm2_vector_gating_projection_head.py` |
+| Baseline (NoESM_NoUW) | `baseline_ligandlm/` | `Scripts/models/baseline_noESM_noUW/layers.py` |
+| ESM_VG | `esm_vg_ligandlm/` | `Scripts/models/ESM_VG/layers_esm2_vector_gating.py` |
+| v4_Projection | `v4_projection_ligandlm/` | `Scripts/models/v4_Projection/layers_esm2_vector_gating_projection_head.py` |
 
-## Klasör yapısı
+## Folder structure
 
 ```
 data_preparation/
-  10_lmdb_v3_chemberta.py   — TEK gerçek veri hazırlama script'i. lmdb_planet_v2
-                               (binder+decoy) okuyup her ligand icin ChemBERTa
-                               embedding hesaplar, yeni lmdb_planet_v3'e yazar.
+  10_lmdb_v3_chemberta.py   — the ONE real data-preparation script. Reads
+                               lmdb_planet_v2 (binder+decoy), computes a
+                               ChemBERTa embedding for every ligand, writes
+                               the result into a new lmdb_planet_v3.
 
 {baseline,esm_vg,v4_projection}_ligandlm/
-  layers_ligand_lm_gate.py               — paylaşılan gate modülü (3 kopya, aynı dosya)
-  chemutils*_ligandlm.py                 — tensorize_ligand'a 7. eleman (chemberta
-                                            embedding) ekleyen kopya
-  PLANET_datautils*_ligandlm.py          — sadece import satırı değişti
-  PLANET_model*_ligandlm.py              — gate LigandGAT'ten sonra enjekte edildi
-  PLANET_train_*_ligandlm.py             — eğitim döngüsü (WandB proje: PLANET_LIGAND_LM)
-  launch_*_ligandlm.sh                   — TRUBA sbatch script'i (barbun-cuda)
+  layers_ligand_lm_gate.py               — shared gate module (3 identical copies)
+  layers*.py / nnutils.py                — copied from Scripts/models/<model>/ so
+                                            each folder is self-contained
+  chemutils*_ligandlm.py                 — copy of the base chemutils with a 7th
+                                            element (ChemBERTa embedding) added
+                                            to tensorize_ligand()
+  PLANET_datautils*_ligandlm.py          — only the import line changed
+  PLANET_model*_ligandlm.py              — gate injected right after LigandGAT
+  PLANET_train_*_ligandlm.py             — training loop (WandB project: PLANET_LIGAND_LM)
+  launch_*_ligandlm.sh                   — TRUBA sbatch script (barbun-cuda)
 
 anzu/
-  launch_anzu_ligandlm.sh   — Anzu'da (Slurm yok) tek GPU'da 2 model (ESM_VG+
-                               baseline) nohup ile başlatan script
+  launch_anzu_ligandlm.sh   — launches 2 models on a single GPU on Anzu (no
+                               Slurm there) via nohup, so as not to occupy
+                               more than one GPU that other users might need
 ```
 
-**Önemli — orijinal 10 modelin dosyalarına HİÇ dokunulmadı.** Her şey `_ligandlm`
-son ekli yeni kopyalar olarak eklendi (`chemutils_esm2_vector.py` gibi paylaşılan
-dosyalar aynı zamanda diğer eval/benchmark script'leri tarafından kullanıldığı
-için doğrudan değiştirilmesi onları kırardı).
+**Important — none of the original 10 models' files were modified.**
+Everything here is a new `_ligandlm`-suffixed copy (files like
+`chemutils_esm2_vector.py` are also used by other eval/benchmark scripts, so
+editing them in place would have broken those).
 
-## Artık kullanılmayan / terk edilen yaklaşımlar (kayıt için)
+## Abandoned intermediate approaches (kept here for the record)
 
-İki ara script yazıldı ama daha hızlı bir yol bulununca **tamamen terk edildi**,
-bu yüzden bu klasöre eklenmedi:
-- `09_generate_ChemBERTa_embeddings.py` (binder-only, h5 cache) — sadece binder
-  embedding'lerini önceden hesaplayan ilk deneme.
-- `09_generate_ChemBERTa_embeddings_decoys.py` (all_pickles'tan decoy embedding,
-  ~441GB okuma, tahmini ~4.5 gün) — `all_pickles/` yerine `lmdb_planet_v2`'nin
-  (~25GB, tek memory-mapped dosya, ~100x daha hızlı) kullanılabileceği fark
-  edilince terk edildi.
+Two intermediate scripts were written and then **fully abandoned** once a
+much faster approach was found, so they are intentionally NOT included in
+this folder:
+- `09_generate_ChemBERTa_embeddings.py` (binder-only, h5 cache) — first
+  attempt, precomputed only binder embeddings.
+- `09_generate_ChemBERTa_embeddings_decoys.py` (decoy embeddings read from
+  `all_pickles/`, ~441GB of I/O, estimated ~4.5 days) — abandoned once it
+  became clear `lmdb_planet_v2` (~25GB, a single memory-mapped file, ~100x
+  faster) could be used instead.
 
-`10_lmdb_v3_chemberta.py` bu ikisinin yaptığı işi TEK GEÇİŞTE, çok daha hızlı
-yapıyor — hem binder hem decoy embedding'ini `lmdb_planet_v2` kaydından
-doğrudan hesaplayıp yeni `lmdb_planet_v3` kaydına yazıyor. Reprodüktibilite
-için bu iki terk edilmiş script'i saklamaya gerek yok.
+`10_lmdb_v3_chemberta.py` does the job of both scripts in a **single pass**,
+much faster — it computes both binder and decoy embeddings directly from each
+`lmdb_planet_v2` record and writes the result into the new `lmdb_planet_v3`
+record. There is no need to keep the two abandoned scripts for
+reproducibility.
 
-## Durum (2026-08-12 itibarıyla)
+## Status (as of 2026-08-12)
 
-- `lmdb_planet_v3` üretimi devam ediyor (TRUBA, Job 6230180 + zincir 6230376)
-- 3 model henüz eğitilmedi — bu klasördeki script'ler hazır, eğitim `lmdb_planet_v3`
-  tamamlanınca başlatılacak (ESM_VG+baseline → Anzu tek GPU, v4_Projection → TRUBA)
+- `lmdb_planet_v3` generation is in progress (TRUBA, Job 6230180 + chained
+  continuation job 6230376)
+- None of the 3 models have been trained yet — the scripts in this folder
+  are ready and will be launched once `lmdb_planet_v3` finishes (ESM_VG +
+  baseline → single GPU on Anzu, v4_Projection → TRUBA)

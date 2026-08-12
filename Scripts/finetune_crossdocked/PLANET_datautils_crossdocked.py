@@ -1,15 +1,15 @@
 """
 PLANET_datautils_crossdocked.py
 ================================
-CrossDocked 2020 fine-tune için DataLoader.
+DataLoader for CrossDocked 2020 fine-tuning.
 
-PDBbind DataLoader'dan farkları:
-  - Her batch = aynı pocket'tan rastgele 12 binder (hepsi complex_label=1)
-  - Decoy yok
-  - pK_flag=1 (Vina tabanlı pK değerleri)
-  - Her binder ayrı LMDB kaydı — meta JSON'da pocket_name ile gruplanır
+Differences from the PDBbind DataLoader:
+  - each batch = 12 random binders from the same pocket (all complex_label=1)
+  - no decoys
+  - pK_flag=1 (Vina-based pK values)
+  - each binder is its own LMDB record -- grouped by pocket_name in the meta JSON
 
-LMDB meta JSON yapısı:
+LMDB meta JSON structure:
   [
     {"key": "1433B__2bq0_5f74_amp", "pocket_name": "1433B_HUMAN_1_240_pep_0",
      "pdb_id": "2bq0", "pK": 5.12},

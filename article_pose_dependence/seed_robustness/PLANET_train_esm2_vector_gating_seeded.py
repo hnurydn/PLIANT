@@ -15,8 +15,9 @@ PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / da
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PLANET_train_esm2_vector_gating_seeded.py
-# Orijinal Scripts/PLANET_train_esm2_vector_gating.py'nin (GERÇEK üretim
-# script'i) SEED-KONTROLLÜ + MAX_STEP'li kopyası (ESM_VG modeli).
+# A SEEDED + MAX_STEP-patched copy of the original
+# Scripts/PLANET_train_esm2_vector_gating.py (the ACTUAL production script)
+# for the ESM_VG model.
 # ═══════════════════════════════════════════════════════════════════════════
 
 scripts_path = os.path.join(PLANET_ROOT, "Scripts")

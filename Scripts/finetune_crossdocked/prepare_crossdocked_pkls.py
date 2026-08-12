@@ -1,23 +1,23 @@
 """
 prepare_crossdocked_pkls.py
 ============================
-CrossDocked 2020 verisi için ComplexPocket PKL dosyaları oluşturur.
+Builds ComplexPocket PKL files for the CrossDocked 2020 data.
 
-PDBbind'den farkı:
-  - Her pocket için birden fazla binder var (cross-docked ligandlar)
-  - Decoy yok — tüm ligandlar complex_label=1 (binder)
-  - pK değerleri JSON'dan gelir (Vina tabanlı)
+Differences from PDBbind:
+  - each pocket has multiple binders (cross-docked ligands)
+  - no decoys -- every ligand has complex_label=1 (binder)
+  - pK values come from a JSON file (Vina-based)
 
-Çıktı yapısı:
+Output structure:
   output_dir/
     {pocket_name}/
-      {pdb_id}_{lig_code}_binder.pkl   ← her binder için ayrı pkl
+      {pdb_id}_{lig_code}_binder.pkl   <- one pkl per binder
 
-Kullanım:
+Usage:
     python prepare_crossdocked_pkls.py \
-        --json_path /arf/.../crossdocked_new_records.json \
-        --extracted_dir /arf/.../crossdocked_extracted \
-        --output_dir /arf/.../crossdocked_pkls \
+        --json_path $PLANET_ROOT/.../crossdocked_new_records.json \
+        --extracted_dir $PLANET_ROOT/.../crossdocked_extracted \
+        --output_dir $PLANET_ROOT/.../crossdocked_pkls \
         --njobs 8
 """
 

@@ -3,29 +3,31 @@
 """
 pose_perturbation_eval.py
 ===========================
-Bir PLANET modelini (tek checkpoint) pose_perturbation.py'nin ürettiği RMSD bin'li
-CASF-2016 core-set LMDB'lerine karşı değerlendirir. Amaç: Affinity Pearson / Contact
-AUROC'un ligand poz RMSD'sinin fonksiyonu olarak nasıl bozulduğunu ölçmek
-(bkz. makale/pose_perturbation_teknik_tasarim.md).
+Evaluates a single PLANET model (one checkpoint) against the RMSD-binned
+CASF-2016 core-set LMDBs produced by pose_perturbation.py. Goal: measure how
+Affinity Pearson / Contact AUROC degrade as a function of ligand pose RMSD
+(see makale/pose_perturbation_teknik_tasarim.md).
 
-Tasarım kararları:
-  - TEK checkpoint (iter-1900000) — eval_unified.py'deki gibi checkpoint sweep YOK.
-  - Youden threshold, modelin ORİJİNAL (bozulmamış) valid.lmdb'sinden BİR KEZ hesaplanır
-    ve tüm RMSD bin'lerine sabit uygulanır. Amaç: eşiği her bin'de yeniden optimize etmek
-    "RMSD'nin etkisini" eşik-ayarlamasıyla maskeleyebilir — bu deney için istenmeyen bir
-    karıştırıcı (confounder) olurdu.
-  - Çıktı WandB'ye değil, doğrudan CSV'ye yazılır (offline/hızlı, auth gerektirmez).
+Design decisions:
+  - a SINGLE checkpoint (iter-1900000) is used — unlike eval_unified.py, there
+    is NO checkpoint sweep here.
+  - the Youden threshold is computed ONCE from the model's ORIGINAL
+    (unperturbed) valid.lmdb and applied unchanged to every RMSD bin.
+    Re-optimizing the threshold per bin could mask "the effect of RMSD"
+    behind threshold-tuning — an unwanted confounder for this experiment.
+  - output is written directly to a CSV, not WandB (offline/fast, no auth
+    needed).
 
-Kullanım (tek model, tüm RMSD bin'leri):
+Usage (one model, all RMSD bins):
     python pose_perturbation_eval.py \
         --model_type vg \
         --model_label ESM_VG \
         --ckpt_path $PLANET_ROOT/ESM2_UW_VECTOR_GATING_1:11/PLANET.iter-1900000 \
         --valid_data $PLANET_ROOT/datasets/pdbbind2020/lmdb_planet_v2/valid.lmdb \
-        --test_data_dir /arf/scratch/hnaydin/PLANET_ORIGINAL/pose_perturbation_output_esm \
+        --test_data_dir $PLANET_ROOT/../pose_perturbation_output_esm \
         --rmsd_bins 0,1,2,3,4 \
         --dims 512 \
-        --out_csv /arf/scratch/hnaydin/PLANET_ORIGINAL/pose_perturbation_eval_results.csv
+        --out_csv ./pose_perturbation_eval_results.csv
 """
 
 import argparse

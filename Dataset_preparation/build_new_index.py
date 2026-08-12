@@ -1,25 +1,26 @@
 """
 build_new_index.py
 ==================
-train_meta.json / valid_meta.json / core_meta.json dosyalarından
-yeni format index pkl'leri oluşturur.
+Builds new-format index pkl files from the train_meta.json / valid_meta.json /
+core_meta.json files.
 
-Yeni index yapısı (pdb_id bazlı):
+New index structure (keyed by pdb_id):
 {
   "2ydo": {"pK": 7.2,  "binder_key": "binder_000012345", "decoy_keys": ["decoy_000012346", ...]},
   "1abc": {"pK": 8.1,  "binder_key": "binder_000054321", "decoy_keys": ["decoy_000054322"]},
   ...
 }
 
-Bu sayede ProLigDataset:
-  - Batch oluştururken sadece key listelerini kullanır
-  - LMDB'den sadece seçilen key'leri çeker (tek decoy ~10KB, 237MB değil)
-  - Her epoch'ta farklı random decoy seçimi yapılır
+This lets ProLigDataset:
+  - use only key lists when building batches
+  - fetch only the selected keys from the LMDB (a single decoy is ~10KB, not
+    the 237MB the whole record used to be)
+  - pick a different random decoy each epoch
 
-Kullanım:
+Usage:
     python build_new_index.py \
-        --meta_dir  /arf/scratch/.../lmdb_planet \
-        --out_dir   /arf/scratch/.../index
+        --meta_dir  $PLANET_ROOT/.../lmdb_planet \
+        --out_dir   $PLANET_ROOT/.../index
 """
 
 import json, pickle, argparse, os

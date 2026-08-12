@@ -1,30 +1,30 @@
 """
 LITPCBA_benchmark_lmdb.py
 ==========================
-LIT-PCBA benchmark — NoESM ve ESM versiyonları, LMDB tabanlı.
+LIT-PCBA benchmark, LMDB-based -- supports both NoESM and ESM model variants.
 
---model_type noesm  → PLANET_model      (feature_dim=20,  BLOSUM62)
---model_type esm    → PLANET_model_esm2 (feature_dim=512, ESM2+PCA)
+--model_type noesm  -> PLANET_model      (feature_dim=20,  BLOSUM62)
+--model_type esm    -> PLANET_model_esm2 (feature_dim=512, ESM2+PCA)
 
-LIT-PCBA özellikleri:
-  - Her target için birden fazla template → run_id = {target}_{template}
-  - actives/decoys: düz .sdf (gz değil)
-  - Sonuçlar hem run_id hem target bazında raporlanır
+LIT-PCBA specifics:
+  - Multiple templates per target -> run_id = {target}_{template}
+  - actives/decoys: plain .sdf (not gzipped)
+  - Results are reported both per run_id and per target
 
-Kullanım:
-    # NoESM, tek checkpoint:
+Usage:
+    # NoESM, single checkpoint:
     python LITPCBA_benchmark_lmdb.py \
-        --lmdb_dir   /arf/.../lmdb_litpcba_noesm \
-        --model_path /arf/.../model.pt \
-        --out_dir    /arf/.../litpcba_results \
+        --lmdb_dir   $PLANET_ROOT/.../lmdb_litpcba_noesm \
+        --model_path $PLANET_ROOT/.../model.pt \
+        --out_dir    $PLANET_ROOT/.../litpcba_results \
         --model_type noesm \
         --feature_dims 300 --nheads 8 --key_dims 300 --value_dims 300
 
-    # ESM, tüm klasör:
+    # ESM, whole checkpoint folder:
     python LITPCBA_benchmark_lmdb.py \
-        --lmdb_dir       /arf/.../lmdb_litpcba_esm \
-        --checkpoint_dir /arf/.../checkpoints_esm \
-        --out_dir        /arf/.../litpcba_results_esm \
+        --lmdb_dir       $PLANET_ROOT/.../lmdb_litpcba_esm \
+        --checkpoint_dir $PLANET_ROOT/.../checkpoints_esm \
+        --out_dir        $PLANET_ROOT/.../litpcba_results_esm \
         --model_type esm \
         --feature_dims 512 --nheads 8 --key_dims 128 --value_dims 128
 """

@@ -1,18 +1,18 @@
 """
 PLANET_datautils_esm2_lmdb_v2.py
 =================================
-lmdb_planet_v2 ile çalışır.
+Works with lmdb_planet_v2.
 
-Her binder key'i → ComplexPocket(ligand=gerçek, decoys=[Mol1, Mol2, ...])
+Each binder key -> ComplexPocket(ligand=ground truth, decoys=[Mol1, Mol2, ...])
 
-Train modu:
-- Batch başına sadece binder key'leri okunur
-- tensorize_all() → random_ligand_decoy() → random decoy seçimi
-- Hız: eski PKL sistemi ile aynı
+Train mode:
+- only binder keys are read per batch
+- tensorize_all() -> random_ligand_decoy() -> random decoy selection
+- speed: same as the old PKL-based system
 
-Eval modu (decoy_count verilince):
-- Her binder için ilk min(decoy_count, mevcut) kadar decoy alınır
-- Binder + decoylar deterministik olarak işlenir
+Eval mode (when decoy_count is given):
+- for each binder, the first min(decoy_count, available) decoys are taken
+- the binder + decoys are processed deterministically
 """
 
 import os, pickle, random, lmdb, json

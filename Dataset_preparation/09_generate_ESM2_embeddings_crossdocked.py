@@ -1,17 +1,18 @@
 """
 09_generate_ESM2_embeddings_crossdocked.py
 ==========================================
-CrossDocked 2020 receptor PDB dosyalarından ESM2 embedding üretir.
-Mevcut H5 dosyasına EKLER (üzerine yazmaz).
+Generates ESM-2 embeddings from CrossDocked 2020 receptor PDB files.
+APPENDS to the existing H5 file (does not overwrite it).
 
-- H5'te zaten olan PDB ID'leri atlanır
-- CrossDocked PDB ID'leri küçük harf, H5 keyler büyük harf → uppercase dönüşümü yapılır
+- PDB IDs already present in the H5 file are skipped
+- CrossDocked PDB IDs are lowercase, H5 keys are uppercase -> converted to
+  uppercase
 
-Kullanım:
+Usage:
     python 09_generate_ESM2_embeddings_crossdocked.py \
-        --json_path /arf/.../datasets/crossdocked_new_records.json \
-        --extracted_dir /arf/.../datasets/crossdocked_extracted \
-        --h5_path /arf/.../pdbbind2020_esm2_embeddings_v2.h5 \
+        --json_path $PLANET_ROOT/.../datasets/crossdocked_new_records.json \
+        --extracted_dir $PLANET_ROOT/.../datasets/crossdocked_extracted \
+        --h5_path $PLANET_ROOT/.../pdbbind2020_esm2_embeddings_v2.h5 \
         --batch_size 2
 """
 

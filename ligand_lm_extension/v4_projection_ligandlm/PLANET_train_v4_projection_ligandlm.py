@@ -11,10 +11,13 @@ from sklearn.metrics import roc_auc_score, average_precision_score, f1_score, pr
 from scipy.stats import pearsonr, spearmanr
 
 # ═══════════════════════════════════════════════════════════════════════════
-# PLANET_train_esm2_vector_gating_contrastive_loss_v4_seeded.py
-# Orijinal Scripts/PLANET_train_esm2_vector_gating_contrastive_loss_v4.py'nin
-# SEED-KONTROLLÜ + MAX_STEP'li kopyası (v4_Projection modeli). Aynı desen:
-# --seed + --max_step eklendi, geri kalan mantık birebir aynı.
+# PLANET_train_v4_projection_ligandlm.py
+# Training script for the v4_Projection + ligand-LM (ChemBERTa) model.
+# Adapted from the seed-robustness copy of
+# Scripts/PLANET_train_esm2_vector_gating_contrastive_loss_v4.py; uses
+# PLANET_datautils_esm2_vector_ligandlm / the _ligandlm model file (7-element
+# mol_batch with the ChemBERTa embedding) and logs to the PLANET_LIGAND_LM
+# WandB project.
 # ═══════════════════════════════════════════════════════════════════════════
 
 scripts_path = os.path.dirname(os.path.abspath(__file__))

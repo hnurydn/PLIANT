@@ -14,9 +14,10 @@ PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / da
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PLANET_train_esm2_vector_gating_contrastive_loss_v4_seeded.py
-# Orijinal Scripts/PLANET_train_esm2_vector_gating_contrastive_loss_v4.py'nin
-# SEED-KONTROLLÜ + MAX_STEP'li kopyası (v4_Projection modeli). Aynı desen:
-# --seed + --max_step eklendi, geri kalan mantık birebir aynı.
+# A SEEDED + MAX_STEP-patched copy of the original
+# Scripts/PLANET_train_esm2_vector_gating_contrastive_loss_v4.py (v4_Projection
+# model). Same pattern: --seed + --max_step added, the rest of the logic is
+# unchanged.
 # ═══════════════════════════════════════════════════════════════════════════
 
 scripts_path = os.path.join(PLANET_ROOT, "Scripts")

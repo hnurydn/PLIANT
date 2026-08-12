@@ -1,11 +1,11 @@
 """
 update_lmdb_with_esm2.py
 ========================
-lmdb_planet içindeki binder objelerine ESM2 embedding ekler.
-Her PDB için sadece 1 embedding — decoy'lar aynı proteini paylaşır.
+Adds ESM-2 embeddings to the binder objects in lmdb_planet.
+Only 1 embedding per PDB -- decoys share the same protein.
 
-Giriş : lmdb_planet  (binder_key → ComplexPocket)
-Çıkış : lmdb_planet_v2  (binder_key → ComplexPocket + res_features)
+Input : lmdb_planet  (binder_key -> ComplexPocket)
+Output: lmdb_planet_v2  (binder_key -> ComplexPocket + res_features)
 """
 
 import os, pickle, lmdb, json, h5py, argparse
@@ -17,12 +17,12 @@ PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / da
 
 
 # =======================================================
-# PARAMETRELER
+# PARAMETERS
 # =======================================================
 ESM2_H5_PATH   = os.path.join(PLANET_ROOT, "pdbbind2020_esm2_embeddings_v2.h5")
 PCA_PARAMS_PATH = os.path.join(PLANET_ROOT, "esm2_pca_params.pkl")
 PDB_MAP_JSON   = os.path.join(PLANET_ROOT, "datasets/pdbbind2020/PDBbind_structure_map_pkd_prepared.json")
-HEDEF_BOYUT    = 512
+TARGET_DIM    = 512
 MAP_SIZE_GB    = 200
 
 AA_3_TO_1 = {

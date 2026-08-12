@@ -12,9 +12,10 @@ from scipy.stats import pearsonr, spearmanr
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PLANET_train_esm2_vector_gating_ligandlm.py
-# ESM_VG + ligand-LM (ChemBERTa) uzantisi. PLANET_train_esm2_vector_gating.py
-# (Scripts/, GERCEK uretim script'i) ile ayni egitim dongusu; tek fark:
-# lmdb_planet_v3 + *_ligandlm datautils/model modulleri.
+# ESM_VG + ligand-LM (ChemBERTa) extension. Same training loop as
+# Scripts/PLANET_train_esm2_vector_gating.py (the ACTUAL production script);
+# the only difference is the use of lmdb_planet_v3 + the *_ligandlm
+# datautils/model modules.
 # ═══════════════════════════════════════════════════════════════════════════
 
 scripts_path = os.path.dirname(os.path.abspath(__file__))

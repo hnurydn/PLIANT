@@ -1,17 +1,17 @@
 """
 create_crossdocked_lmdb.py
 ===========================
-CrossDocked PKL dosyalarından ESM2 embedding ekleyip LMDB oluşturur.
+Builds an LMDB from CrossDocked PKL files, adding ESM-2 embeddings.
 
-Her binder ayrı LMDB kaydı olarak yazılır.
-Meta JSON'da pocket_name alanı var — DataLoader pocket bazlı gruplama yapar.
+Each binder is written as its own LMDB record.
+The meta JSON has a pocket_name field -- the DataLoader groups by pocket.
 
-Çıktı:
+Output:
   lmdb_crossdocked/
     train.lmdb
     train_meta.json
 
-Meta JSON yapısı:
+Meta JSON structure:
   [
     {
       "key":         "1433B_HUMAN_1_240_pep_0__2bq0_5f74_amp",
@@ -22,14 +22,14 @@ Meta JSON yapısı:
     ...
   ]
 
-Kullanım:
+Usage:
     python create_crossdocked_lmdb.py \
-        --pkl_dir      /arf/.../crossdocked_pkls \
-        --json_path    /arf/.../crossdocked_new_records.json \
-        --h5_path      /arf/.../pdbbind2020_esm2_embeddings_v2.h5 \
-        --pca_path     /arf/.../esm2_pca_params.pkl \
-        --extracted_dir /arf/.../crossdocked_extracted \
-        --out_lmdb     /arf/.../lmdb_crossdocked \
+        --pkl_dir      $PLANET_ROOT/.../crossdocked_pkls \
+        --json_path    $PLANET_ROOT/.../crossdocked_new_records.json \
+        --h5_path      $PLANET_ROOT/.../pdbbind2020_esm2_embeddings_v2.h5 \
+        --pca_path     $PLANET_ROOT/.../esm2_pca_params.pkl \
+        --extracted_dir $PLANET_ROOT/.../crossdocked_extracted \
+        --out_lmdb     $PLANET_ROOT/.../lmdb_crossdocked \
         --map_size_gb  100
 """
 

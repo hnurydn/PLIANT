@@ -1,11 +1,11 @@
 """
 noesm_pkl_to_lmdb.py
 ====================
-noESM modelleri için pkl dosyalarını LMDB'ye yazar.
-ComplexPocket objeleri olduğu gibi kaydedilir (tensorize edilmez).
-Sonraki adımda ayrıca tensorize edilecek.
+Writes pkl files for the noESM models into an LMDB.
+ComplexPocket objects are stored as-is (not tensorized).
+Tensorization happens in a later, separate step.
 
-Kullanım:
+Usage:
     python noesm_pkl_to_lmdb.py
 """
 

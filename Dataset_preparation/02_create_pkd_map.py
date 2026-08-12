@@ -8,15 +8,15 @@ PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / da
 
 
 
-# --- Yapılandırma ---
-# İŞİN ÇALIŞTIĞI ANA DİZİN (Scratch)
+# --- Configuration ---
+# Main working directory (scratch)
 BASE_DIR = os.path.join(PLANET_ROOT, "datasets/pdbbind2020")
-# Yeni JSON dosyasının adı
+# Name of the output JSON file
 OUTPUT_JSON = os.path.join(BASE_DIR, "PDBbind_structure_map_pkd_prepared.json")
-# PDBbind index dosyasının yolu (index klasöründe olduğunu varsayıyoruz)
+# Path to the PDBbind index file (assumed to be in the index/ folder)
 INDEX_FILE = os.path.join(BASE_DIR, "index", "INDEX_general_PL.2020R1.lst")
 
-# Taranacak ana yıl klasörleri
+# Year folders to scan
 YEAR_FOLDERS = ["1981-2000", "2001-2010", "2011-2019"]
 
 # --- Yeni Fonksiyonlar ---

@@ -1,17 +1,17 @@
 """
 PLANET_datautils_esm2.py
 =========================
-lmdb_planet_v2 ile çalışır.
+Works with lmdb_planet_v2.
 
-Her binder key'i → ComplexPocket(ligand=gerçek, decoys=[Mol1, Mol2, ...])
+Each binder key -> ComplexPocket(ligand=ground truth, decoys=[Mol1, Mol2, ...])
 
-Train modu:
-- Her batch = 1 binder + rastgele 11 decoy (aynı pocket'tan)
-- 11'den az decoy'u olan pocket'lar atlanır
+Train mode:
+- each batch = 1 binder + 11 random decoys (from the same pocket)
+- pockets with fewer than 11 decoys are skipped
 
-Eval modu (decoy_count verilince):
-- Her binder için ilk min(decoy_count, mevcut) kadar decoy alınır
-- Binder + decoylar deterministik olarak işlenir
+Eval mode (when decoy_count is given):
+- for each binder, the first min(decoy_count, available) decoys are taken
+- the binder + decoys are processed deterministically
 """
 
 import os, pickle, random, lmdb, json

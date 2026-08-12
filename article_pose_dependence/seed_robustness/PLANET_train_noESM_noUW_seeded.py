@@ -16,10 +16,9 @@ PLANET_ROOT = os.environ.get("PLANET_ROOT", ".")  # root of the cloned repo / da
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PLANET_train_noESM_noUW_seeded.py
-# Orijinal Scripts/PLANET_train_noESM_noUW.py'nin (GERÇEK üretim script'i --
-# Model/ klasöründeki eski/farklı kopya DEĞİL) SEED-KONTROLLÜ + MAX_STEP'li
-# kopyası. Degisiklikler: --seed + --max_step eklendi, geri kalan mantik
-# birebir ayni.
+# A SEEDED + MAX_STEP-patched copy of the original Scripts/PLANET_train_noESM_noUW.py
+# (the ACTUAL production script -- NOT the older/different copy in Model/).
+# Changes: --seed + --max_step added, the rest of the logic is unchanged.
 # ═══════════════════════════════════════════════════════════════════════════
 
 scripts_path = os.path.join(PLANET_ROOT, "Scripts")
