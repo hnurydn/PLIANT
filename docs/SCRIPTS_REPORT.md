@@ -9,6 +9,18 @@
 > (3) otomatik envanter tabloları (her dosya), (4) varyantlar arası programatik diff'ler.
 > Tablolar ve diff'ler doğrudan kaynak dosyalardan üretildi (yorum katmadan).
 
+> **⚠️ GÜNCELLEME NOTU (2026-08-12):** Bu rapor `Scripts/`'in **eski, düz** halini
+> (30 Mayıs 2026 anlık görüntüsü) belgeliyor — dosya isimleri/eşlemeler hâlâ doğru
+> ve güvenilir bir referans, ama fiziksel konumlar artık farklı: `Scripts/` model
+> bazında yeniden düzenlendi (bkz. `Scripts/models/README.md`). Ayrıca bu taşıma
+> sırasında **gerçek bir provenance hatası bulunup düzeltildi** — düz isimli
+> `PLANET_train_esm2_vector_gating_contrastive_loss.py`'nin aşağıdaki Bölüm 3.1'de
+> "`PLANET_model_esm2_vector_gating_contrastive_loss.py`" kullandığı yazıyor, ve bu
+> **doğru** (Anzu'daki eğitim-öncesi kopya + checkpoint MD5 karşılaştırmasıyla
+> teyit edildi) — ama TRUBA'daki dosya sonradan (eğitimden ~1 ay sonra) elle
+> `_v3` import edecek şekilde değiştirilmişti, taşıma sırasında düzeltildi.
+> Detay: `Scripts/models/README.md`.
+
 ---
 
 ## 1. Genel Bakış

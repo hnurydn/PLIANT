@@ -17,7 +17,10 @@ if datautils_path not in sys.path:
 
 try:
     from PLANET_datautils_esm2_vector import ProLigDataset          # ← LMDB versiyonu
-    from PLANET_model_esm2_vector_gating_contrastive_loss_v3 import PLANET
+    from PLANET_model_esm2_vector_gating_contrastive_loss import PLANET   # [DÜZELTİLDİ 2026-08-12] bkz. README: bu dosya sonradan
+    # v3'ü işaret edecek şekilde düzenlenmişti (30 Mart eğitiminden sonra); Anzu'daki
+    # eğitim-öncesi kopya + checkpoint MD5 karşılaştırmasıyla doğru import'un bu
+    # olduğu (düz contrastive_loss.py, margin=1.0) kesinleştirildi.
     RDLogger.DisableLog('rdApp.*')
 except ImportError as e:
     print(f"KRİTİK HATA: Modül bulunamadı. Detay: {e}", file=sys.stderr)
