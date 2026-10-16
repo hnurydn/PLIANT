@@ -29,14 +29,14 @@ from rdkit import Chem, RDLogger
 
 RDLogger.DisableLog('rdApp.*')
 
-# ---- yardimci moduller calisma aninda baglanir (TRUBA ve Anzu farkli isimler) ----
+# ---- helper modules are bound at run time (the cluster and the workstation use different names) ----
 def _bind(code_paths, helper_module):
     for _p in reversed([x.strip() for x in code_paths.split(",") if x.strip()]):
         if _p not in sys.path:
             sys.path.insert(0, _p)
     h = importlib.import_module(helper_module)
-    # LMDB pickle'lari orijinal script __main__ iken yazilmis -> kayit siniflari
-    # __main__'de bulunmali, yoksa unpickle "Can't get attribute" verir.
+    # The LMDB pickles were written while the original script was __main__, so the record
+    # classes must be reachable in __main__ or unpickling fails with "Can't get attribute".
     import __main__, inspect
     for _n, _o in vars(h).items():
         if inspect.isclass(_o) and not hasattr(__main__, _n):
@@ -45,7 +45,7 @@ def _bind(code_paths, helper_module):
 
 
 def calculate_ef(active_scores, decoy_scores):
-    """DUDE scriptindeki calculate_ef ile birebir ayni formul."""
+    """Exactly the same formula as calculate_ef in the DUD-E script."""
     y_true = np.concatenate([np.ones_like(active_scores), np.zeros_like(decoy_scores)])
     y_score = np.concatenate([active_scores, decoy_scores])
     sorted_labels = y_true[np.argsort(-y_score)]
@@ -59,7 +59,7 @@ def calculate_ef(active_scores, decoy_scores):
 
 
 def predict_dual(model, loader, p_fresidues, p_alpha_coords, device, center_ligands):
-    """Ayni ileri gecisten hem afinite hem temas skoru dondurur."""
+    """Return both the affinity and the contact score from a single forward pass."""
     aff_out, con_top10, con_mean, natoms = [], [], [], []
     n_res = p_fresidues.shape[0]
     pocket_center = p_alpha_coords.mean(dim=0)
@@ -108,7 +108,7 @@ def predict_dual(model, loader, p_fresidues, p_alpha_coords, device, center_liga
 
 
 def metrics(act, dec):
-    """Tek kanal icin hedef-ici AUC + EF (eski scriptteki hesabin aynisi)."""
+    """Within-target AUC and EF for one channel (the same computation as the earlier script)."""
     ok_a = np.isfinite(act); ok_d = np.isfinite(dec)
     act, dec = act[ok_a], dec[ok_d]
     if len(act) == 0 or len(dec) == 0:
@@ -130,7 +130,7 @@ def load_model_strict(mod_name, ckpt_path, a, device):
     ck = torch.load(ckpt_path, map_location=device)
     sd = ck["model_state_dict"] if isinstance(ck, dict) and "model_state_dict" in ck else ck
     missing, unexpected = model.load_state_dict(sd, strict=False)
-    # strict=False sessizce bos model birakabilir -> acikca dogrula
+    # strict=False can silently leave the model empty, so verify explicitly
     if missing or unexpected:
         print("!! state_dict uyusmazligi -- eksik:%d beklenmeyen:%d" % (len(missing), len(unexpected)))
         for k in list(missing)[:10]:    print("   eksik:", k)
@@ -212,7 +212,7 @@ def main():
 
         a_aff, a_c10, a_cme, a_nat = predict_dual(model, al, p_fres, p_alpha, device, a.center_ligands)
         d_aff, d_c10, d_cme, d_nat = predict_dual(model, dl, p_fres, p_alpha, device, a.center_ligands)
-        # [SKOR] 18 Eyl: boyut duzeltmeli analiz icin ligand basi skorlar + atom sayisi
+        # [SCORES] 18 Sep: per-ligand scores and heavy-atom counts, for the size-corrected analysis
         np.savez_compressed(os.path.join(os.path.dirname(a.out_csv), "skor_%s_%s.npz" % (a.run_name.split("_shard")[0], tname)),
                             a_aff=a_aff, d_aff=d_aff, a_c10=a_c10, d_c10=d_c10, a_nat=a_nat, d_nat=d_nat)
         if len(a_aff) == 0 or len(d_aff) == 0:

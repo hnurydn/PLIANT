@@ -1,16 +1,18 @@
 #!/bin/bash
-# ==========================================================================
-# 13 Eki: dude_brl/litpcba_brl KOPYASI — TEK FARK: code_paths sonuna ablasyon/ eklendi (ABL1/ABL2 modulleri).
-# 30 Eyl: BRL (birlesik) kopyasi; MERKEZ=1 -> --center_ligands (ligand merkezi -> cep alfa merkezi, dondurme/cakisma kontrolu yok).
-# 28 Eyl kopyasi (vgtop.sh + orjkol/ceptemask code_paths) <- 23 Eyl kopyasi: _esm = lmdb_dude_esm (512) + kapi/ modulleri once aranir
-# sumaff_dude_array.sh -- SUMAFF deneyi: ORT vs TOP kolu, DUD-E @ITER (18 Eyl 2026)
-# bench24_dude_array.sh'in kopyasi (MERKEZSIZ, 101 hedef, N parca). FARKLAR:
-#   - checkpoint: sumaff_dude/ckpt/$ARM/PLANET.iter-$ITER (Anzu'dan aktarildi, md5 dogrulandi)
-#   - script: screen_dude.py (ligand basi skor + atom sayisi .npz kaydeder)
-#   - cikti: sumaff_dude/out/
-#   sbatch --job-name=d24s_TOP --array=0-5 \
-#     --export=ALL,ARM=TOP,MODMOD=PLANET_model_gatenorm_sumaff,ITER=100000 sumaff_dude_array.sh
-# ==========================================================================
+# DUD-E virtual screening for one PLIANT variant, as a Slurm job array over 101 targets.
+#
+# MERKEZ=1 selects the CENTRED protocol: --center_ligands moves each ligand's centre onto
+# the pocket's alpha-carbon centre, with no rotation and no clash correction. This is the
+# protocol reported in the abstract. MERKEZ=0 is the uncentred protocol used elsewhere in
+# the project and is NOT what the abstract reports.
+#
+# The scoring script is screen_dude.py, which also writes per-ligand scores and heavy-atom
+# counts to .npz so that size-corrected metrics can be computed afterwards.
+#
+# Required: ARM (checkpoint folder under sumaff_dude/ckpt/), MODMOD (model module), ITER.
+# Example:
+#   sbatch --export=ALL,ARM=ABL2_P0_700k,MODMOD=pliant_esm_model,ITER=700000,MERKEZ=1 \
+#          slurm_screen_dude.sh
 #SBATCH --partition=debug
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -43,7 +45,7 @@ MY=$EXP/sumaff_dude
 OUT=$MY/out
 mkdir -p "$OUT" "$MY/logs"
 
-SRC=$BASE/datasets/pdbbind2020/dude/${DUDE_LMDB:-lmdb_dude_esm_cafix}   # 23 Eyl: ESM kollari (kapi deneyi)
+SRC=$BASE/datasets/pdbbind2020/dude/${DUDE_LMDB:-lmdb_dude_esm_cafix}   # ESM arms
 CKPT=$MY/ckpt/$ARM/PLANET.iter-$ITER
 [ -f "$CKPT" ] || { echo "HATA: checkpoint yok: $CKPT"; exit 2; }
 
@@ -51,9 +53,9 @@ SSD=/tmp/hnaydin_d24s_${SLURM_ARRAY_JOB_ID:-$$}_${SHARD}
 mkdir -p "$SSD"
 cp -r "$SRC/"* "$SSD/"
 
-export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK OPENBLAS_NUM_THREADS=$SLURM_CPUS_PER_TASK  # 22 Eyl: c10 kopyasi
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK OPENBLAS_NUM_THREADS=$SLURM_CPUS_PER_TASK  # thread limits, one copy per task
 export WANDB_MODE=disabled
-export CUDA_VISIBLE_DEVICES=""   # 22 Eyl: debug GPU dugumlerinde create_var tensoru cuda ya tasiyordu -> sessiz hata
+export CUDA_VISIBLE_DEVICES=""   # on debug GPU nodes create_var moved tensors to cuda, which failed silently
 
 python -u "$MY/screen_dude.py" \
     --model_module "$MODMOD" \

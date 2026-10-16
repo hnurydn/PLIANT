@@ -1,6 +1,6 @@
 #!/bin/bash
-# TAM SET yerlestirilmis decoy pozlariyla lmdb_planet_v2_cepte kurar (core -> valid -> train).
-# Eski lmdb_planet_v2'ye dokunulmaz. Kurucu kuyruk_{split}_tam.txt'yi referans alir.
+# Builds lmdb_planet_v2_cepte from the FULL set of placed decoy poses (core -> valid -> train).
+# The old lmdb_planet_v2 is left untouched. The builder reads kuyruk_{split}_tam.txt as its queue.
 #SBATCH --partition=barbun
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -18,7 +18,7 @@ source /arf/home/hnaydin/miniconda3/etc/profile.d/conda.sh
 conda activate /arf/home/hnaydin/miniconda3/envs/pocketgen
 export OMP_NUM_THREADS=1
 D=/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/lmdb_planet_v2_cepte
-# 19 Eyl'in kirpik (maks100) kopyalarini temizle - yerlerine tam set yazilacak
+# remove the truncated (maks100) copies from 19 Sep - the full set is written in their place
 rm -rf $D/core.lmdb $D/valid.lmdb $D/train.lmdb $D/core_meta.json $D/valid_meta.json $D/train_meta.json
 for S in core valid train; do
   case $S in core) M=8 ;; valid) M=20 ;; train) M=90 ;; esac

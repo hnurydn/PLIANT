@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""RESMI CASF-2016 DOCKING POWER — DUZELTILMIS CHECKPOINTLER + UYUM SKORU (25 Eyl 2026)
-=====================================================================================
-eval_casf_docking_power.py'nin (16 Eyl) uzerine iki duzeltme:
+"""CASF-2016 DOCKING POWER, with random tie-breaking and a contact-agreement channel (25 Sep 2026)
+=================================================================================================
+Two corrections on top of the earlier eval_casf_docking_power.py (16 Sep):
 
-1) BERABERLIK: eski ozet np.argsort(-s) ile esit skorlarda hep ilk pozu seciyordu;
-   CASF mol2 dosyalarinda ilk poz hedeflerin %54,6'sinda <=2 A oldugu icin poza kor
-   modeller %52 "basari" aliyordu (artefakt). Burada beraberlik RASTGELE bozulur
-   (200 tekrar ortalamasi) ve her hedef icin sans beklentisi de raporlanir.
+1) TIES: the earlier summary used np.argsort(-s), which always picks the first pose when the
+   scores are equal. In the CASF mol2 files the first pose is within 2 A for 54.6% of the
+   targets, so a pose-blind model appeared to "succeed" on 52% of them, which is an artefact.
+   Here ties are broken AT RANDOM and averaged over 200 repeats, and the chance expectation is
+   reported for every target.
 
-2) UYUM SKORU (PLANET v2.0 Denklem 10'un ikili temas karsiligi): modelin tahmin ettigi
-   temas haritasi p_ij ile pozun GEOMETRIK temas haritasi c_ij (atom-rezidu <=4.0 A,
-   egitim etiketiyle ayni kural) arasindaki ortalama log-olabilirlik:
-       uyum = mean_ij [ c*log p + (1-c)*log(1-p) ]     (buyuk = iyi)
-   Poza kor modellerde p pozdan bagimsizdir, skor yalniz c uzerinden pozlari ayirir ->
-   "model bu cep icin dogru baglanma modunu biliyor mu" sorusu. ONCEDEN ILAN: birincil
-   kanal = uyum; aff ve temas-ortalamasi eski olcumle kiyas icin ikincil.
+2) AGREEMENT SCORE (the pairwise contact counterpart of Eq. 10 in PLANET v2.0): the mean
+   log-likelihood between the predicted contact map p_ij and the pose's GEOMETRIC contact map
+   c_ij (atom-residue <= 4.0 A, the same rule as the training label):
+       agreement = mean_ij [ c*log p + (1-c)*log(1-p) ]     (higher is better)
+   For a pose-blind model p does not depend on the pose, so the score separates poses through c
+   alone, which asks whether the model knows the correct binding mode for this pocket.
+   PRE-DECLARED: the primary channel is agreement; the affinity and mean-contact channels are
+   secondary and are kept for comparison with the earlier measurement.
 
-Negatif kontrol: poza kor modellerde aff ve temas-ortalamasi her hedefte sabit olmali
-(tum_berabere_orani ~1.0); beraberlik duzeltmesiyle top1 ~ sans cikmali.
+Negative control: for a pose-blind model the affinity and mean-contact channels must be constant
+within every target (tum_berabere_orani ~ 1.0), and with the tie correction top1 should come out
+at chance.
 
-Kullanim: PLANET_ARCH=<etiket> PLANET_OUT=<dosya.json> python -u eval_docking_power.py [--limit N]
+Usage: PLANET_ARCH=<label> PLANET_OUT=<file.json> python -u eval_docking_power.py [--limit N]
 """
 import os, sys, json, pickle, importlib, argparse, gc
 import numpy as np
@@ -29,16 +32,17 @@ ROOT = "/arf/scratch/hnaydin/PLANET_ORIGINAL"
 BASE = os.path.join(ROOT, "Planet_model")
 SCRIPTS = os.path.join(BASE, "Scripts")
 
-# ─── 15 Eki 2026: BLOSUM cebi (Baseline/ABL1 kolu) ────────────────────────────
-# CASF cep pickle'lari ESM-2 (512) oznitelikli. BLOSUM kolu 20 boyut bekler; model modulu
-# import edilince chemutils.FEATURE_DIM 512->20 oluyor ve tensorize UYUMSUZ ozniteligi
-# HATA VERMEDEN kirpar (ilk 20 ESM boyutu = anlamsiz). Burada oznitelik rezidu TURUNDEN
-# yeniden kurulur. Residue.residue_type mevcut -> koordinat eslemesi gerekmiyor.
+# --- 15 Oct 2026: BLOSUM pocket features (the baseline / ABL1 arm) ----------------
+# The CASF pocket pickles carry ESM-2 (512-dim) features, but the BLOSUM arm expects 20
+# dims. Importing that model module sets chemutils.FEATURE_DIM from 512 to 20, after which
+# tensorize silently truncates the mismatched feature vector WITHOUT raising (the first 20
+# ESM dimensions are meaningless). Here the features are rebuilt from the residue TYPE;
+# Residue.residue_type is available, so no coordinate matching is needed.
 _BLOSUM62 = None
 
 
 def pocket_to_blosum(obj):
-    """PLANET_BLOSUM=1 ise cebin rezidu ozniteliklerini BLOSUM62 satirlariyla degistirir."""
+    """If PLANET_BLOSUM=1, replace the pocket's residue features with BLOSUM62 rows."""
     global _BLOSUM62
     if os.environ.get("PLANET_BLOSUM", "0") != "1":
         return obj
@@ -71,7 +75,7 @@ RMSD_CUT = 2.0
 CONTACT_CUT = 4.0
 N_TIE = 200
 
-# eski script ile ayni yol sirasi (dogrulanmis: chemutils Scripts'ten gelir)
+# same path order as the earlier script (verified: chemutils is picked up from Scripts/)
 for p in (BASE, SCRIPTS, SUMLN):
     if p not in sys.path:
         sys.path.insert(0, p)
@@ -149,9 +153,10 @@ def main():
                 per[pid] = {"error": "poz<5 (atilan %d)" % dropped}; continue
             obj = pickle.load(open(os.path.join(POCK, kind, pid + ".pkl"), "rb"))
             pocket_to_blosum(obj)
-            # 25 Eyl: mol_batch_to_graph kiraliteyi her pozun 3B'sinden yeniden hesapliyordu
-            # (atom ozelligi!) -> poza kor model 1g2k'da 94 poza 20 farkli skor verdi.
-            # Kiralite native'e en yakin pozdan BIR KEZ alinir, tum pozlara aynen yazilir.
+            # 25 Sep: mol_batch_to_graph recomputed chirality from each pose's 3D coordinates
+            # (it is an atom feature), so a pose-blind model produced 20 different scores
+            # across the 94 poses of 1g2k. Chirality is now taken ONCE from the pose closest
+            # to native and copied verbatim to every pose.
             from rdkit import Chem
             src = Chem.Mol(keep[int(np.argmin([r for _, _, r in keep]))][1])
             Chem.rdmolops.AssignAtomChiralTagsFromStructure(src)
@@ -187,7 +192,7 @@ def main():
     json.dump(res, open(out, "w"))
     print("\nhata: %d / %d hedef   sablona uymadigi icin atilan poz: %d"
           % (res["n_hata"], len(ids), res["atilan_poz_toplam"]))
-    # n_temas: modelden bagimsiz referans — "en cok temas eden pozu sec" basit kurali
+    # n_temas: a model-independent reference - the naive "pick the pose with the most contacts" rule
     for ch in ("dice", "uyum_dengeli", "uyum_ham", "affinity", "contact_mean", "n_temas"):
         S = res[ch]
         print("  %-12s top1 %6s (sans %s)  top2 %6s  top3 %6s  rho %6s  berabere %s  n=%s"

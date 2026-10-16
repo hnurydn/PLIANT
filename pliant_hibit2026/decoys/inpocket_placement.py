@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Decoy yerleştirme v3 (19 Eyl 2026): çakışma ATOM YARIÇAPLARINA göre, temas ödülü kısılmış.
-v2'de tek 3,0 Å eşiği kullanılıyordu; çakışma cezası binder seviyesine indi ama Vina %77 itici buldu.
-v3: her atom çifti için izinli mesafe = F * (r_i + r_j) (van der Waals yarıçapları).
-E = Σ_pairs max(0, F*(ri+rj) - d)  -  ALFA * temas  +  LAMBDA * max(0, |merkez-ref| - RMAX)
+"""In-pocket decoy placement, v3 (19 Sep 2026): the clash penalty is based on ATOM RADII and
+the contact reward is capped.
+v2 used a single 3.0 A threshold; that brought the clash penalty down to binder level, but Vina
+still found 77% of the resulting poses repulsive.
+v3: the allowed distance for each atom pair is F * (r_i + r_j), from van der Waals radii.
+E = sum_pairs max(0, F*(ri+rj) - d)  -  ALPHA * contacts  +  LAMBDA * max(0, |centre-ref| - RMAX)
 """
 import numpy as np
 
@@ -36,12 +38,12 @@ def kucuk_donus(rng, sigma_derece):
 
 
 def olc(x_agir, r_lig, cep, r_cep, F, temas_ust=1.45):
-    """çakışma cezası (yarıçap tabanlı) ve temas sayısı."""
+    """Clash penalty (radius-based) and the number of contacts."""
     d = np.sqrt(((x_agir[:, None, :] - cep[None, :, :]) ** 2).sum(-1))
     izin = F * (r_lig[:, None] + r_cep[None, :])
     cak = float(np.clip(izin - d, 0, None).sum())
     oran = d / (r_lig[:, None] + r_cep[None, :])
-    tem = int(((oran >= F) & (oran <= temas_ust)).any(1).sum())   # temas kabuğunda atom sayısı
+    tem = int(((oran >= F) & (oran <= temas_ust)).any(1).sum())   # number of atoms in the contact shell
     return cak, tem
 
 
@@ -51,7 +53,7 @@ def place_in_pocket(x0, agir, r_lig_agir, cep, r_cep, ref, rng, F=0.85, ALFA=0.0
     R = rastgele_donusler(n_aday, rng)
     T = rng.uniform(-jit, jit, size=(n_aday, 3)); T[0] = 0.0
     hepsi = np.einsum("nij,aj->nai", R, merkezli) + (ref + T)[:, None, :]
-    # ucuz ön seçim: yalnız min-mesafe tabanlı kaba ceza
+    # cheap pre-filter: coarse penalty from the minimum distance only
     A = hepsi[:, agir, :]
     dmin = np.sqrt(((A[:, :, None, :] - cep[None, None, :, :]) ** 2).sum(-1)).min(2)
     kaba = np.clip(3.2 - dmin, 0, None).sum(1)

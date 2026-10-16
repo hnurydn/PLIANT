@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""TAM SET yerleştirme geçişi (19 Eyl 2026) — paylaşımlı iş kuyruğu + Vina yerel optimizasyonu.
+"""Full placement pass (19 Sep 2026) - a shared work queue plus local Vina optimisation.
 
-Her decoy: geometrik yerleştirme (yarıçap tabanlı, v3) → Vina YEREL optimizasyon (arama yok) →
-poz KOORDİNAT EŞLEŞTİRMEYLE geri yazılır (atom sırasına güvenilmez, bkz. 18 Eyl testi).
-İş birimi = (cep, decoy dilimi). Dilimler ortak bir kuyruktan flock ile alınır → kuyruk sorunu yok,
-işler sonradan eklenebilir.  Çıktı: yerlesim/son/<split>_<key>_<start>.npz  (+ enerjiler, çakışma)
-Kullanım: SPLIT=train NPROC=56 python -u place_decoys.py
+For every decoy: geometric placement (radius-based, v3) -> LOCAL Vina optimisation (no search) ->
+the pose is written back BY MATCHING COORDINATES (atom order cannot be trusted; see the 18 Sep test).
+The unit of work is a (pocket, decoy shard) pair. Shards are taken from a shared queue under flock,
+so there is no queue contention and more work can be appended later.
+Output: yerlesim/son/<split>_<key>_<start>.npz (plus energies and clash values)
+Usage: SPLIT=train NPROC=56 python -u place_decoys.py
 """
 import sys, os, time, json, pickle, subprocess, tempfile, fcntl
 import numpy as np
@@ -21,18 +22,18 @@ from multiprocessing import Pool
 
 OB = "/arf/home/hnaydin/miniconda3/envs/pocketgen/bin/obabel"
 P = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020"
-L = os.environ.get("LMDB_DIR", f"{P}/lmdb_planet_v2")   # is basinda /tmp'ye kopyalanir
+L = os.environ.get("LMDB_DIR", f"{P}/lmdb_planet_v2")   # copied to /tmp at the start of the job
 KOK = "/arf/scratch/hnaydin/PLANET_ORIGINAL/cepte/yerlesim"
 OUT = f"{KOK}/son"
 SPLIT = os.environ.get("SPLIT", "core")
 DILIM = int(os.environ.get("DILIM", "150"))
-MAXDEC = int(os.environ.get("MAXDEC", "0"))   # 0 = sinirsiz; ör. 100 = cep basina ilk 100 decoy
+MAXDEC = int(os.environ.get("MAXDEC", "0"))   # 0 = unlimited; e.g. 100 = first 100 decoys per pocket
 NPROC = int(os.environ.get("NPROC", "20"))
-ZAMANLA = os.environ.get("ZAMANLA", "0") == "1"   # 1 = her dilim icin asama sureleri yazilir
+ZAMANLA = os.environ.get("ZAMANLA", "0") == "1"   # 1 = log per-stage timings for every shard
 AD_OK = {"C","N","O","S","P","H","F","CL","BR","I","ZN","FE","MG","CA","MN","CU","NA","K","HG","CD","NI","CO","SR"}
 KUYRUK = f"{KOK}/kuyruk_{SPLIT}" + (f"_maks{MAXDEC}" if MAXDEC else "") + ".txt"
 IMLEC = f"{KOK}/imlec_{SPLIT}" + (f"_maks{MAXDEC}" if MAXDEC else "") + ".txt"
-# [20 Eyl] hazir kuyruk dosyasi: KUYRUK_EK=kalan -> kuyruk_{split}_kalan.txt
+# [20 Sep] use a prepared queue file: KUYRUK_EK=kalan -> kuyruk_{split}_kalan.txt
 _EK = os.environ.get("KUYRUK_EK", "")
 if _EK:
     KUYRUK = f"{KOK}/kuyruk_{SPLIT}_{_EK}.txt"
@@ -41,7 +42,7 @@ os.makedirs(OUT, exist_ok=True)
 
 
 def kuyruk_kur():
-    """(cep, baslangic, bitis) is listesini bir kez olustur."""
+    """Build the (pocket, start, end) work list once."""
     if os.path.exists(KUYRUK) and os.path.getsize(KUYRUK) > 0: return
     meta = json.load(open(f"{L}/{SPLIT}_meta.json"))
     sat = []
@@ -58,7 +59,7 @@ def kuyruk_kur():
 
 
 def sirada_al():
-    """Kuyruktan sıradaki satırı kilitle alarak döndür (None = bitti)."""
+    """Return the next line from the queue, taking a lock (None = queue exhausted)."""
     fd = os.open(IMLEC, os.O_RDWR | os.O_CREAT)
     try:
         fcntl.flock(fd, fcntl.LOCK_EX)
@@ -85,11 +86,11 @@ def pdbqt_koord(path):
                      for l in open(path) if l.startswith(("ATOM", "HETATM"))])
 
 
-ESKI_SAHIP = 1800   # sn: bu kadar eski sahiplenme dosyasi gecersiz sayilir (yarim kalan is devralinir)
+ESKI_SAHIP = 1800   # seconds: a claim file older than this is treated as stale, so unfinished work is taken over
 
 
 def sahiplen(hedef):
-    """Dilimi atomik sahiplen (O_EXCL). Bayat sahiplenmeyi devral."""
+    """Claim a shard atomically (O_EXCL); take over a stale claim."""
     cl = hedef + ".claim"
     try:
         fd = os.open(cl, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
@@ -98,7 +99,7 @@ def sahiplen(hedef):
     except FileExistsError:
         try:
             if time.time() - os.path.getmtime(cl) > ESKI_SAHIP:
-                os.utime(cl, None)      # bayat -> devral
+                os.utime(cl, None)      # stale -> take over
                 return True
         except FileNotFoundError:
             pass
@@ -106,7 +107,7 @@ def sahiplen(hedef):
 
 
 def eksik_dilimler():
-    """Ciktisi olmayan dilimler (sure siniri yuzunden yarim kalanlar dahil)."""
+    """Shards with no output, including those cut short by the time limit."""
     out = []
     for l in open(KUYRUK):
         l = l.strip()
@@ -147,7 +148,7 @@ def isci(_):
             obj = pickle.loads(bytes(raw))
             decs = (obj.decoys or [])[a:b]
             if not decs: continue
-            # cep: koordinat + element (PDB'den; LMDB'de element yok)
+            # pocket: coordinates plus element symbols (from the PDB; the LMDB has no elements)
             cep, cep_el = [], []
             with open(f"{tmp}/r.pdb", "w") as w:
                 for l in open(f"{d}/{key}_pocket.pdb"):

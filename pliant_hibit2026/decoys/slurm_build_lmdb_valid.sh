@@ -1,6 +1,8 @@
 #!/bin/bash
-# valid_temiz icin iki cepte LMDB (22 Eyl 2026). Yerlesim isi (6397208) BITINCE calisir (--dependency).
-# Once: kuyruktaki her dilimin npz'i var mi? Eksik varsa YAZMAZ (exit 6). Hedef valid_temiz.lmdb varsa YAZMAZ.
+# Builds the two in-pocket LMDBs for the valid_temiz split (22 Sep 2026). Runs only AFTER the
+# placement job (6397208) finishes (--dependency).
+# First checks that every shard in the queue has its npz. If any is missing it writes NOTHING
+# (exit 6). It also refuses to write if the target valid_temiz.lmdb already exists.
 #SBATCH --partition=debug
 #SBATCH --nodes=1
 #SBATCH --ntasks=1

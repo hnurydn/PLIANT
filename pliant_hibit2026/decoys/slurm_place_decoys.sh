@@ -18,7 +18,7 @@ export MKL_NUM_THREADS=1
 export NPROC=56
 export DILIM=150
 export NADAY=64
-# LMDB'yi dugumun yerel diskine kopyala (Lustre uzerinden 56 islemciyle okumak yavas)
+# copy the LMDB to the node's local disk (reading it from Lustre with 56 processes is slow)
 SRC=/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/datasets/pdbbind2020/lmdb_planet_v2
 LOC=/tmp/hn_yer4_${SLURM_JOB_ID}
 mkdir -p $LOC

@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""YENI LMDB: decoy pozlari cebe yerlestirilmis haliyle yazilir. ESKI LMDB'ye DOKUNULMAZ.
+"""Writes a NEW LMDB in which the decoy poses have been placed inside the pocket. The OLD LMDB
+is left UNTOUCHED.
 
-Kaynak : lmdb_planet_v2/{split}.lmdb + cepte/yerlesim/son/{split}_{key}_{bas}.npz
-Cikti  : lmdb_planet_v2_cepte/{split}.lmdb   (KIP=cepte)  -> decoy koordinatlari yerlestirilmis
-         lmdb_planet_v2_ilk100/{split}.lmdb  (KIP=kirp)   -> ESKI uzak koordinatlar, ayni decoy alt kumesi
-                                                             (decoy sayisi eslenmis KONTROL kolu)
-Her iki kipte de decoy listesi yerlestirilen alt kumeye kirpilir; meta n_decoys guncellenir.
-Kullanim: SPLIT=core KIP=cepte python -u build_inpocket_lmdb.py
+Input  : lmdb_planet_v2/{split}.lmdb + cepte/yerlesim/son/{split}_{key}_{start}.npz
+Output : lmdb_planet_v2_cepte/{split}.lmdb   (KIP=cepte) -> decoy coordinates placed in the pocket
+         lmdb_planet_v2_ilk100/{split}.lmdb  (KIP=kirp)  -> the OLD distant coordinates for the same
+                                                            decoy subset (a CONTROL arm matched on
+                                                            the number of decoys)
+In both modes the decoy list is cut down to the placed subset and the n_decoys field is updated.
+Usage: SPLIT=core KIP=cepte python -u build_inpocket_lmdb.py
 """
 import os, sys, json, pickle, time
 import numpy as np
 sys.path.insert(0, "/arf/scratch/hnaydin/PLANET_FIXED_20260917/pipeline")
 sys.path.insert(0, "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Scripts")
 import lmdb
-import chemutils_esm2_vector          # pickle sinif tanimlari
+import chemutils_esm2_vector          # class definitions needed to unpickle
 from rdkit import RDLogger
 from rdkit.Geometry import Point3D
 RDLogger.DisableLog('rdApp.*')
@@ -25,7 +27,7 @@ OUT_N = {"cepte": "lmdb_planet_v2_cepte", "kirp": "lmdb_planet_v2_ilk100"}
 SPLIT = os.environ.get("SPLIT", "core")
 KIP   = os.environ.get("KIP", "cepte")
 DST   = os.environ.get("DST", f"{P}/{OUT_N[KIP]}")
-# [20 Eyl] tam set yerlestirildiyse _tam kuyrugu kullanilir (yoksa 19 Eyl'in _maks100 kuyrugu)
+# [20 Sep] if the full set was placed, use the _tam queue; otherwise fall back to the _maks100 queue
 KUY   = os.environ.get("KUYRUK_DOSYA", "")
 if not KUY:
     _tam = f"{KOK}/kuyruk_{SPLIT}_tam.txt"
@@ -38,7 +40,7 @@ os.makedirs(DST, exist_ok=True)
 
 
 def dilimler():
-    """key -> [(bas, bit), ...] sirali"""
+    """key -> [(start, end), ...], ordered"""
     d = {}
     for l in open(KUY):
         l = l.strip()
@@ -68,7 +70,7 @@ def main():
             obj = pickle.loads(bytes(raw))
             parcalar = dil.get(k, [])
             if not parcalar:
-                # decoy'u olmayan cep: oldugu gibi korunur (binder kumesi eski LMDB ile AYNI kalmali)
+                # pocket with no decoys: kept as is (the binder set must stay IDENTICAL to the old LMDB)
                 obj.decoys = []
                 obj.decoys_count = 0
                 txn_w.put(k.encode(), pickle.dumps(obj, protocol=pickle.HIGHEST_PROTOCOL))
@@ -81,7 +83,7 @@ def main():
                 if not os.path.exists(f):
                     eks = True; break
                 z = np.load(f)
-                if z["xyz"].shape[0] != b - a:      # hizalama bozuksa bu cebi atla
+                if z["xyz"].shape[0] != b - a:      # skip this pocket if the alignment is broken
                     eks = True; break
                 xyz_l.append(z["xyz"]); nat_l.append(z["nat"])
             if eks or not xyz_l:
@@ -91,7 +93,7 @@ def main():
             decoys = (obj.decoys or [])[:n_yer]
             if len(decoys) != n_yer:
                 rapor["eksik_dilim"] += 1; continue
-            # atom sayisi denetimi (hizalama kaniti)
+            # atom-count check (evidence that the alignment holds)
             if any(d.mol.GetNumAtoms() != int(n) for d, n in zip(decoys, nat)):
                 rapor["atom_uyusmaz"] += 1; continue
             if KIP == "cepte":

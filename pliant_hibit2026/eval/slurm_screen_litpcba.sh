@@ -1,21 +1,20 @@
 #!/bin/bash
-# ==========================================================================
-# 13 Eki: dude_brl/litpcba_brl KOPYASI — TEK FARK: code_paths sonuna ablasyon/ eklendi (ABL1/ABL2 modulleri).
-# 30 Eyl: BRL (birlesik) kopyasi; MERKEZ=1 -> --center_ligands.
-# 28 Eyl: sumaff_dude/litpcba_array_orjcm.sh <- bench24_litpcba_array.sh kopyasi
-#   ckpt=sumaff_dude/ckpt/$ARM, cikti sumaff_dude/out/litpcba_$ARM_*, MERKEZSIZ, orjkol/ceptemask/vgtop code_paths
-# bench24_litpcba_array.sh -- LIT-PCBA cift kanal @2.400.000, 124 kayit N parcada.
-# bench19_litpcba_array.sh'in kopyasi. IKI FARK:
-#   1) ITER varsayilani 2400000, cikti dizini bench24/
-#   2) --center_ligands YOK  <-- MERKEZSIZ protokol (tezin ana protokolu).
-#      bench19 merkezliydi; bu yuzden bench19 <-> bench24 kiyasi
-#      protokol-eslesmis DEGILDIR, bench24 kendi icinde kiyaslanir.
-#   3) DATA=esm|noesm  -> baseline (PLANET_model_gatenorm) ESM'siz lmdb kullanir.
+# LIT-PCBA virtual screening for one PLIANT variant, as a Slurm job array over the 15
+# targets (124 target/template pairs).
 #
-#   sbatch --job-name=l24_esmvggn42 --array=0-5 \
-#     --export=ALL,TAG=esmvggn_seed42,CKPTDIR=ESMVGNORM_SUMLN_GN_seed42,\
-# MODMOD=PLANET_model_esm2_vector_gating_normalized_sumln_gn bench24_litpcba_array.sh
-# ==========================================================================
+# MERKEZ=1 selects the CENTRED protocol: --center_ligands moves each ligand's centre onto
+# the pocket's alpha-carbon centre, with no rotation and no clash correction. This is the
+# protocol reported in the abstract. MERKEZ=0 is the uncentred protocol used elsewhere in
+# the project and is NOT what the abstract reports; results from the two protocols are not
+# comparable with each other.
+#
+# The scoring script is screen_litpcba.py. It resumes: if the output csv already exists the
+# targets it contains are skipped, so an interrupted array task continues where it stopped.
+#
+# Required: ARM (checkpoint folder under sumaff_dude/ckpt/), MODMOD (model module), ITER.
+# Example:
+#   sbatch --export=ALL,ARM=BYER0_700k,MODMOD=pliant_esm_pose_model,ITER=700000,MERKEZ=1 \
+#          slurm_screen_litpcba.sh
 #SBATCH --partition=barbun
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -64,7 +63,7 @@ mkdir -p "$SSD"
 cp -r "$SRC/"* "$SSD/"
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK OPENBLAS_NUM_THREADS=$SLURM_CPUS_PER_TASK
-export CUDA_VISIBLE_DEVICES=""   # debug GPU dugumlerinde sessiz cuda hatasi (22 Eyl)
+export CUDA_VISIBLE_DEVICES=""   # avoids the silent cuda failure on debug GPU nodes
 export WANDB_MODE=disabled
 
 python -u "$CODE/screen_litpcba.py" \

@@ -29,8 +29,8 @@ def _bind(code_paths, helper_module):
         if _p not in sys.path:
             sys.path.insert(0, _p)
     h = importlib.import_module(helper_module)
-    # LMDB pickle'lari orijinal script __main__ iken yazilmis -> kayit siniflari
-    # __main__'de bulunmali, yoksa unpickle "Can't get attribute" verir.
+    # The LMDB pickles were written while the original script was __main__, so the record
+    # classes must be reachable in __main__ or unpickling fails with "Can't get attribute".
     import __main__, inspect
     for _n, _o in vars(h).items():
         if inspect.isclass(_o) and not hasattr(__main__, _n):
@@ -39,7 +39,7 @@ def _bind(code_paths, helper_module):
 
 
 def calc_ef(active_scores, decoy_scores):
-    """DUDE/LITPCBA scriptlerindeki calculate_ef ile birebir ayni formul."""
+    """Exactly the same formula as calculate_ef in the DUD-E / LIT-PCBA scripts."""
     y_true = np.concatenate([np.ones_like(active_scores), np.zeros_like(decoy_scores)])
     y_score = np.concatenate([active_scores, decoy_scores])
     sorted_labels = y_true[np.argsort(-y_score)]
@@ -208,11 +208,11 @@ def main():
                "EF1_temas_top10": (m_c10["EF"]["EF_1.0%"] if m_c10 else np.nan),
                "AUC_temas_ort": (m_cme["AUC"] if m_cme else np.nan),
                "EF1_temas_ort": (m_cme["EF"]["EF_1.0%"] if m_cme else np.nan),
-               # [13 Eki 2026 YAMA] calc_ef zaten 0.5/1/2/5% hesapliyordu, yalniz 1% yaziliyordu.
+               # [PATCH, 13 Oct 2026] calc_ef already computed 0.5/1/2/5%, but only 1% was written out.
                "EF05_afinite": m_aff["EF"]["EF_0.5%"], "EF2_afinite": m_aff["EF"]["EF_2.0%"],
                "EF5_afinite": m_aff["EF"]["EF_5.0%"]}
-        # [13 Eki 2026 YAMA] molekul bazinda skorlari kaydet -> sonradan HERHANGI bir metrik
-        # (genis EF, boyut duzeltmesi, zenginlestirme egrisi) yeniden kosmadan hesaplanabilsin.
+        # [PATCH, 13 Oct 2026] save per-molecule scores so that ANY later metric (further EF
+        # cut-offs, size correction, enrichment curves) can be computed without re-running.
         try:
             import os as _os, re as _re
             _d = _os.path.dirname(a.out_csv)

@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""BINDER-ONLY TEMAS AUROC — duzeltilmis checkpointler (25 Eyl 2026)
-===================================================================
-Soru: modelin tahmin ettigi atom-rezidu temas haritasi, kristal kompleksin GERCEK temas
-haritasini ne kadar dogru buluyor? Decoy KULLANMAZ -> yerlesim/protonasyon/gomulme
-artefaktlarindan bagimsiz. Makaledeki eski sayilar (baseline 0,543 / ESM_UW 0,789 /
-v4 0,913 / ESM_VG 0,944) H1/H2/H3'lu eski modellerdendi; burada duzeltilmisler olculur.
+"""BINDER-ONLY CONTACT AUROC (25 Sep 2026)
+=========================================
+Question: how well does the predicted atom-residue contact map match the TRUE contact map of the
+crystal complex? This test uses NO decoys, so it is independent of placement, protonation and
+burial artefacts.
 
-Kosullar (etiket HER ZAMAN kristal pozdan):
-  kristal : ligand kristal pozunda
-  kay2 / kay4 : ligand rastgele yonde 2 / 4 A OTELENMIS (saf oteleme -> RMSD tam 2 / 4 A),
-                3 tekrar. Poza kor modelde skor degismemeli (negatif kontrol); poza duyarli
-                modelde dusus = katkinin "geometriyi okuma" kismi.
-Metrik: tum ciftler havuzlanmis AUROC (makaledeki gibi) + kompleks basi AUROC ortalamasi.
-Veri: casf_dock/<v1|v2>/<pdb>.pkl (CASF-2016 coreset, ComplexPocket; ligand + pro_lig_interaction)
-Kullanim: PLANET_ARCH=<etiket> python -u eval_contact_auroc.py [--limit N]
+Conditions (the label ALWAYS comes from the crystal pose):
+  kristal     : ligand in its crystal pose
+  kay2 / kay4 : ligand TRANSLATED by 2 / 4 A in a random direction (pure translation, so the RMSD
+                is exactly 2 / 4 A), 3 repeats. A pose-blind model must not change its score here
+                (negative control); for a pose-aware model the drop is the part of its contribution
+                that comes from reading geometry.
+Metric: AUROC over all pairs pooled, plus the mean of the per-complex AUROCs.
+Data: casf_dock/<v1|v2>/<pdb>.pkl (CASF-2016 core set, ComplexPocket; ligand + pro_lig_interaction)
+Usage: PLANET_ARCH=<label> python -u eval_contact_auroc.py [--limit N]
 """
 import os, sys, json, pickle, argparse
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import eval_docking_power as E          # MODELS, load_model, score_full (ayni yollar, ayni birlestirme)
+import eval_docking_power as E          # MODELS, load_model, score_full (same paths, same batching)
 
 KAY = [("kay2", 2.0), ("kay4", 4.0)]
 N_TEKRAR = 3
@@ -56,7 +56,7 @@ def main():
             E.pocket_to_blosum(obj)
             lab = np.asarray(obj.pro_lig_interaction, dtype=np.float32)
             m0 = Chem.Mol(obj.ligand.mol)
-            Chem.rdmolops.AssignAtomChiralTagsFromStructure(m0)   # kiralite kristal pozdan, bir kez
+            Chem.rdmolops.AssignAtomChiralTagsFromStructure(m0)   # chirality is taken from the crystal pose, once
             xyz = m0.GetConformer().GetPositions()
             mols, tags = [m0], ["kristal"]
             for k, d in KAY:

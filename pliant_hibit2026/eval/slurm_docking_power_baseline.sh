@@ -1,7 +1,8 @@
 #!/bin/bash
-# 15 Eki: Baseline (ABL1) docking power + binder-only temas. sb_dp_v2_k700.sh kalibi.
-# FARKLAR: PLANET_BLOSUM=1 (cep oznitelikleri BLOSUM62'ye cevrilir), PYTHONPATH'e ablasyon dizini,
-#          IS=dp|temas secimi. Duman: LIMIT=5.
+# 15 Oct: docking power + binder-only contact AUROC for the baseline (ABL1), following the
+# sb_dp_v2_k700.sh template. Differences: PLANET_BLOSUM=1 (pocket features are converted to
+# BLOSUM62 rows), the ablation directory is added to PYTHONPATH, and IS=dp|temas selects the
+# job. Smoke test: LIMIT=5.
 #SBATCH --partition=debug
 #SBATCH --nodes=1 --ntasks=1 --cpus-per-task=20 --mem=40G --time=03:50:00
 #SBATCH -A hnaydin
