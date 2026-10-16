@@ -1,8 +1,8 @@
 # PLIANT — Protein–Ligand Interaction and Affinity Prediction
 
-This repository contains the training, data-preparation and evaluation code for
-**PLIANT**, a multi-task graph neural network that predicts protein–ligand
-contacts, intra-ligand geometry and binding affinity together.
+This repository contains the training, data-preparation and evaluation code for **PLIANT**
+(Protein–Ligand Interaction and Affinity NeTwork), a multi-task graph neural network that
+predicts protein–ligand contacts, intra-ligand geometry and binding affinity together.
 
 PLIANT is trained with **non-binding molecules placed inside the binding pocket**
 and with **two margin constraints** — a binder must score above a decoy in the

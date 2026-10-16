@@ -1,9 +1,9 @@
 # PLIANT — HIBIT 2026 reproducibility package
 
-This folder holds the code behind the three PLIANT variants and every number
-reported in the HIBIT 2026 abstract: the training modules, the in-pocket decoy
-pipeline and the evaluation scripts, together with the Slurm launchers that were
-used, so that each reported value can be traced to the script that produced it.
+This folder holds the code behind the three variants of PLIANT (Protein–Ligand Interaction and
+Affinity NeTwork) and every number reported in the HIBIT 2026 abstract: the training modules,
+the in-pocket decoy pipeline and the evaluation scripts, together with the Slurm launchers that
+were used, so that each reported value can be traced to the script that produced it.
 
 Files were renamed from their cluster filenames to names that match the variant
 names used in the abstract. [`PROVENANCE.json`](PROVENANCE.json) records, for
