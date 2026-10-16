@@ -67,6 +67,7 @@ the docking-power and pose-margin results measure.
 │   ├── evaluation/             # Shared DUD-E / LIT-PCBA / CASF benchmark scripts
 │   ├── finetune_crossdocked/   # Separate CrossDocked fine-tuning pathway
 │   └── deprecated/             # Superseded intermediate architecture (kept for record)
+├── pliant_hibit2026/          # PLIANT variants: training, in-pocket decoys, evaluation
 ├── article_pose_dependence/   # Pose-(in)dependence reproducibility package
 ├── ligand_lm_extension/       # Ligand language model (ChemBERTa) extension, work in progress
 └── *.py, *.sh                 # Top-level driver and Slurm submission scripts
@@ -75,10 +76,8 @@ the docking-power and pose-margin results measure.
 > **Note.** `Scripts/models/` holds the earlier variants trained *without*
 > in-pocket decoys and margins. They share architecture names with the PLIANT
 > variants above but are **not the same runs** — the attention-scaling fixes used
-> in all three PLIANT arms are not present there. The reproducibility package for
-> the PLIANT variants (training scripts, in-pocket decoy generation, the two
-> margin losses, and the evaluation scripts behind each reported number) is being
-> prepared as a separate top-level folder and is not yet in this repository.
+> in all three PLIANT arms are not present there. The code for the PLIANT
+> variants is in [`pliant_hibit2026/`](pliant_hibit2026/).
 
 ## Data
 
