@@ -1,14 +1,12 @@
 import math, os, sys, torch
 import torch.nn as nn
 
-# Mevcut dizini path'e ekle (import sorunlarını önlemek için)
+# add this directory to the path so the sibling modules import cleanly
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # ═══════════════════════════════════════════════════════════════════════════
-# PLANET_model_esm2_vector_gating_normalized.py
-# Orijinal PLANET_model_esm2_vector_gating.py'nin BİREBİR kopyası -- TEK fark
-# import satırı (layers_esm2_vector_gating_normalized'dan yükleniyor, bkz. o
-# dosyanın başındaki açıklama). Model sınıfının kendisi hiç değişmedi.
+# Derived from PLANET's model module. The model class itself is unchanged from upstream;
+# the only difference is the import line, which loads the layers module used by this arm.
 # ═══════════════════════════════════════════════════════════════════════════
 from layers_pliant_esm_pose import ProteinEGNN, LigandGAT, ProLig
 from nnutils import create_var, create_var_gpu

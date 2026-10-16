@@ -1,21 +1,21 @@
 import math, os, sys, torch
 import torch.nn as nn
 
-# Mevcut dizini path'e ekle (import sorunlarını önlemek için)
+# add this directory to the path so the sibling modules import cleanly
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # ═══════════════════════════════════════════════════════════════════════════
-# PLANET_model_esm2_vector_gating_normalized.py
-# Orijinal PLANET_model_esm2_vector_gating.py'nin BİREBİR kopyası -- TEK fark
-# import satırı (layers_esm2_vector_gating_normalized'dan yükleniyor, bkz. o
-# dosyanın başındaki açıklama). Model sınıfının kendisi hiç değişmedi.
+# Derived from PLANET's model module. The model class itself is unchanged from upstream;
+# the only difference is the import line, which loads the layers module used by this arm.
 # ═══════════════════════════════════════════════════════════════════════════
-# [ABLASYON KOL 2 — 2 Eki 2026] PLANET_model_esm2_vg_orj_gercek.py kopyasi; TEK fark katman modulu:
-# layers_pliant_esm (vector attention + gating YOK). Kayip/compute_loss/UW (log_sigma) BIREBIR.
+# [ABLATION ARM 2] A copy of the pose-aware arm's training module; the only difference is the
+# layers module: layers_pliant_esm has no vector attention and no gating. The loss, compute_loss
+# and the uncertainty weighting (log_sigma) are identical.
 from layers_pliant_esm import ProteinEGNN, LigandGAT, ProLig
 from nnutils import create_var, create_var_gpu
 
-# GERCEKETIKET kolu: CEPTEMASK modelinin kopyasi, tek fark decoy temas kaybi maskesiz.
+# True-label arm: a copy of the contact-masked model; the only difference is that the decoy
+# contact loss is not masked.
 class PLANET(nn.Module):
     def __init__(self, feature_dims, nheads, key_dims, value_dims, pro_update_inters, lig_update_iters, pro_lig_update_iters, device):
         super().__init__()
