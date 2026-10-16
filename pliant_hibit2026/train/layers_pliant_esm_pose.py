@@ -7,29 +7,25 @@ from nnutils import create_var
 from nnutils import index_select_ND
 
 # ═══════════════════════════════════════════════════════════════════════════
-# layers_esm2_vector_gating_normalized.py
-# Orijinal layers_esm2_vector_gating.py'nin birebir kopyası (2026-08-21) --
-# TEK fark ProteinLigandAttention.forward() icinde iki satir (asagida
-# [NORMALIZASYON] etiketli). Gerekce: seed-robustness/gate-diagnostic
-# bulgusu -- geo_bias hicbir sinirlama olmadan seed'e gore cok farkli
-# buyuklüklere ulasabiliyor (orijinal |geo_bias| ort. 0.75, seed456'da
-# 12.45 -- 16x), sigmoid dogrusal degil, bu deger buyudukce dikkat
-# agirliklari (0/1'e) doyuyor ve ayirt edicilik kaybediyor (seed456'da
-# attn_weights_lp'nin %74'u >0.8). Bu dosya iki dusuk-riskli duzeltmeyi
-# test ediyor:
-#   1. attn_lig_to_pro / attn_pro_to_lig icerik logit'i sqrt(feature_dims)
-#      ile olceklendi -- ProteinGAT/LigandGAT'taki (ayni dosya, farkli
-#      sinif) standart Transformer olceklemesiyle tutarli hale getirildi,
-#      burada eksikti.
-#   2. geo_bias tanh ile [-geo_bias_scale, +geo_bias_scale] araligina
-#      sinirlandi -- log_sigma_* parametrelerinde zaten kullanilan
-#      clamp deseniyle tutarli bir sinirlama.
-# Diger TUM siniflar (ProteinGAT, LigandGAT, GaussianSmearing, ProLig,
-# ProteinEGNN) DEGISTIRILMEDI -- asagida "DEGISIKLIK YOK" olarak
-# isaretliler, orijinal dosyayla satir satir ayni.
+#
+# Copy of PLANET's vector-gating layers module (2026-08-21). The only difference is two lines in
+# ProteinLigandAttention.forward(), marked [NORMALISATION] below.
+#
+# Reason: a seed-robustness / gate-diagnostic run showed that geo_bias is unbounded and reaches
+# very different magnitudes depending on the seed (mean |geo_bias| 0.75 originally, 12.45 with
+# seed 456, a 16x difference). The sigmoid is non-linear, so as this value grows the attention
+# weights saturate towards 0 or 1 and lose their ability to discriminate (with seed 456, 74% of
+# attn_weights_lp were above 0.8). This file tests two low-risk corrections:
+#   1. the content logits of attn_lig_to_pro / attn_pro_to_lig are scaled by sqrt(feature_dims),
+#      which makes them consistent with the standard Transformer scaling already used in
+#      ProteinGAT / LigandGAT (same file, different classes) and which was missing here;
+#   2. geo_bias is bounded to [-geo_bias_scale, +geo_bias_scale] with tanh, following the clamp
+#      pattern already used for the log_sigma_* parameters.
+# All other classes (ProteinGAT, LigandGAT, GaussianSmearing, ProLig, ProteinEGNN) are UNCHANGED;
+# they are marked "UNCHANGED" below and are line-for-line identical to the original.
 # ═══════════════════════════════════════════════════════════════════════════
 
-# --- DEĞİŞİKLİK YOK (ProteinGAT) ---
+# --- UNCHANGED (ProteinGAT) ---
 class ProteinGAT(nn.Module):
     def __init__(self,feature_dims,nheads,key_dims,value_dims,update_iters,device):
         super().__init__()
@@ -70,7 +66,7 @@ class ProteinGAT(nn.Module):
         fresidues = self.linear_last(torch.cat([fresidues,initial_features],dim=-1))
         return fresidues
 
-# --- DEĞİŞİKLİK YOK (LigandGAT) ---
+# --- UNCHANGED (LigandGAT) ---
 class LigandGAT(nn.Module):
     def __init__(self,feature_dims,nheads,key_dims,value_dims,update_iters,device):
         super().__init__()
@@ -122,7 +118,7 @@ class LigandGAT(nn.Module):
 
         return fatoms
 
-# --- GaussianSmearing (Vector için gerekli) ---
+# --- GaussianSmearing (needed by the vector attention) ---
 class GaussianSmearing(nn.Module):
     def __init__(self, start=0.0, stop=20.0, num_gaussians=32):
         super().__init__()
@@ -134,7 +130,7 @@ class GaussianSmearing(nn.Module):
         dist = dist.unsqueeze(-1) - self.offset
         return torch.exp(self.coeff * torch.pow(dist, 2))
 
-# --- [NORMALIZASYON DENEYİ] ProteinLigandAttention ---
+# --- [NORMALISATION] ProteinLigandAttention ---
 class ProteinLigandAttention(nn.Module):
     def __init__(self, feature_dims, nheads, update_iters, device, dropout_rate=0.2, geo_bias_scale=5.0):
         super().__init__()
@@ -142,7 +138,7 @@ class ProteinLigandAttention(nn.Module):
         self.nheads = nheads
         self.update_iters = update_iters
         self.device = device
-        self.geo_bias_scale = geo_bias_scale  # [NORMALIZASYON] geo_bias'i tanh ile sinirlamak icin sabit olcek
+        self.geo_bias_scale = geo_bias_scale  # [NORMALISATION] fixed scale used to bound geo_bias with tanh
 
         self.lig_transform = nn.Sequential(nn.Linear(feature_dims, feature_dims, bias=False), nn.LeakyReLU(0.1))
         self.res_transform = nn.Sequential(nn.Linear(feature_dims, feature_dims, bias=False), nn.LeakyReLU(0.1))
@@ -226,7 +222,7 @@ class ProteinLigandAttention(nn.Module):
 
         return fatoms, fresidues
 
-# --- DEĞİŞİKLİK YOK (ProLig, +Dropout, Affinity Normalizasyonu -- orijinaldeki gibi) ---
+# --- UNCHANGED (ProLig, plus dropout and the affinity normalisation, as in the original) ---
 class ProLig(nn.Module):
     def __init__(self, feature_dims, nheads, update_iters, device, dropout_rate=0.2):
         super().__init__()
@@ -315,8 +311,9 @@ class ProLig(nn.Module):
                 self.linear_pocket_affinity(pocket_features)
             )
 
-            # [DÜZELTİLDİ] Normalize edilmiş interaction weight ile affinity hesabı
-            # [VGTOP 25 Eyl] TOPLAM + sabit olcek (baseline TOP kolu ile ayni): temas miktari bilgisi korunur
+            # [FIXED] affinity is computed from the normalised interaction weight
+            # [25 Sep] SUM pooling with a fixed scale (as in the baseline sum-pooled arm), which
+            # preserves information about the amount of contact
             interaction_weight = predicted_interaction   # [ORIJINAL KOL] BOLME YOK (ekstansif toplam)
             predict_affinity = torch.sum(
                 self.linear_affinity(complex_features) * interaction_weight
@@ -329,7 +326,7 @@ class ProLig(nn.Module):
         predicted_affinities = torch.cat(predicted_affinities)
         return predicted_lig_interactions,predicted_interactions,predicted_affinities
 
-# --- DEĞİŞİKLİK YOK (ProteinEGNN, Cross-Modal Gating -- orijinaldeki gibi) ---
+# --- UNCHANGED (ProteinEGNN, cross-modal gating, as in the original) ---
 class ProteinEGNN(nn.Module):
     def __init__(self, feature_dims, update_iters, device):
         super().__init__()
@@ -367,7 +364,7 @@ class ProteinEGNN(nn.Module):
 
         # ---- [SUM+LN] toplanan mesaja LayerNorm (agg_ablation deneyinin aynisi)
         self.msg_norm = nn.LayerNorm(feature_dims)
-        # ---- [GATE-NORM] vana GIRDISI icin ayri LayerNorm -------------
+        # ---- [GATE-NORM] a separate LayerNorm for the gate INPUT ----
         # ||m||~250 -> sigmoid doyuyor -> vana cos(m,W) ISARETINE bagli
         # ikili anahtar oluyor ve seed'e gore acik/kapali kilitleniyor.
         # m'yi vanadan ONCE normalize edince kilit kalkiyor.

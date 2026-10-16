@@ -9,18 +9,17 @@ from rdkit import RDLogger
 import wandb
 from sklearn.metrics import roc_auc_score, average_precision_score, f1_score, precision_score, recall_score
 from scipy.stats import pearsonr, spearmanr
-import margin_losses   # 25 Eyl: poz marj kaybi
+import margin_losses   # the two margin losses
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PLANET_train_esm2_vector_gating_normalized_seeded.py
-# PLANET_train_esm2_vector_gating_seeded.py'nin NORMALIZASYON DENEYİ kopyası
+# Copy of PLANET's seeded vector-gating training script for the NORMALISATION experiment.
 # (2026-08-21). Tek fark: model importu layers_esm2_vector_gating_normalized
-# kullanan PLANET_model_esm2_vector_gating_normalized'a yönlendirildi (bkz. o
-# dosyaların başındaki açıklama -- gate-diagnostic/geo_bias_diagnostic
-# bulgusuna dayanan iki normalizasyon: içerik-dikkat logit'i sqrt(feature_dims)
-# ile ölçekleniyor, geo_bias tanh ile sınırlandı). Veri/optimizasyon/kayıp
-# mantığı, seed'leme, resume-aware wandb -- HİÇBİRİ değişmedi, orijinal
-# seeded script'le birebir aynı.
+# It points at the normalised model module. The two normalisations come from the
+# gate-diagnostic / geo_bias-diagnostic finding: the content-attention logit is scaled by
+# sqrt(feature_dims) and geo_bias is bounded with tanh (see the header of the layers file).
+# The data, optimisation and loss logic, the seeding and the resume-aware wandb handling are
+# all unchanged from the original seeded script.
 # ═══════════════════════════════════════════════════════════════════════════
 
 scripts_path = "/arf/scratch/hnaydin/PLANET_ORIGINAL/Planet_model/Scripts"
@@ -44,7 +43,7 @@ try:
     # [22 Eyl 2026 -- KAPI DENEYI] cok cepli/ORJ parti + kol secimi (--model_module)
     import importlib
     from PLANET_datautils_esm2_vector_cokcep import ProLigDataset
-    import PLANET_datautils_esm2_vector as _DU_ESKI   # esdegerlik/geri uyum icin
+    import PLANET_datautils_esm2_vector as _DU_ESKI   # kept for equivalence / backward compatibility
     RDLogger.DisableLog('rdApp.*')
 except ImportError as e:
     print(f"KRİTİK HATA: Modül bulunamadı. Detay: {e}", file=sys.stderr)
@@ -86,7 +85,7 @@ if __name__ == '__main__':
     parser.add_argument('--load_checkpoint', default=None)
     parser.add_argument('--initial_step', type=int, default=0)
 
-    # ── YENİ: seed + max_step ──────────────────────────────────────────────
+    # -- added: seed and max_step ------------------------------------------─
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--max_step', type=int, default=None)
     # ── kapi deneyi ──
@@ -108,7 +107,7 @@ if __name__ == '__main__':
                         help='marj terimini her n adimda bir uygula (maliyet ayari)')
     parser.add_argument('--marj_baslangic', type=int, default=0,
                         help='bu adimdan once marj uygulanmaz')
-    # ── MOLEKUL MARJI: ayni cepte y(binder) >= y(decoy) + marj (ek ileri gecis GEREKMEZ) ──
+    # -- MOLECULE MARGIN: within a pocket, y(binder) >= y(decoy) + margin (no extra forward pass) --
     parser.add_argument('--mol_marj_lambda', type=float, default=0.0)
     parser.add_argument('--mol_marj', type=float, default=1.0)
     # ── 28 Eyl: ZOR DECOY SECIMI (v4kont'taki gibi; verilmezse davranis DEGISMEZ) ──
@@ -118,7 +117,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     os.makedirs(args.save_dir, exist_ok=True)
 
-    # ── YENİ: seed'leme ─────────────────────────────────────────────────────
+    # -- added: seeding -----------------------------------------------------─────
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
     np.random.seed(args.seed)
@@ -126,7 +125,7 @@ if __name__ == '__main__':
     print(f"🎲 Seed sabitlendi: {args.seed}")
 
     # -- YENI: resume-aware wandb (SAVE_DIR'de run-id sakla, walltime kesintisinde
-    # ayni run'a devam et, parcalanmayi/manuel birlestirmeyi onle) --
+    # resume the same run, to avoid fragmenting it or having to merge runs by hand) --
     _wandb_id_file = os.path.join(args.save_dir, "wandb_run_id.txt")
     if os.path.exists(_wandb_id_file):
         with open(_wandb_id_file) as _f:
@@ -182,9 +181,9 @@ if __name__ == '__main__':
                 optimizer.load_state_dict(ckpt['optimizer_state_dict'])
                 print("✅ Optimizer durumu da yüklendi (LR + momentum korunuyor).")
         else:
-            # ── DÜZELTME (2026-08-15): eski format checkpoint'ler sadece model
-            # ağırlığı içeriyordu, optimizer/LR resume'de sessizce sıfırlanıyordu.
-            # Kayıp decay'leri telafi etmek için LR'yi initial_step'e göre düzelt ──
+            # -- FIX (2026-08-15): old-format checkpoints stored only the model weights, so the
+            # optimizer and the learning rate were silently reset on resume. The LR is corrected
+            # from initial_step to make up for the decay steps that were lost --
             PLANET_model.load_state_dict(ckpt)
             n_missed_decays = args.initial_step // 50000
             corrected_lr = args.lr * (0.95 ** n_missed_decays)
@@ -201,9 +200,9 @@ if __name__ == '__main__':
 
         # ---- [SUM+LN] SADECE ProteinEGNN.msg_norm'u duzelt -------------------
         # Yukaridaki global dongu dim()==1 olan HER parametreyi sifirliyor;
-        # LayerNorm.weight de 0 olur ve katman tamamen susar. Modelin ONCEDEN
+        # LayerNorm.weight also becomes 0 and the layer goes completely silent. The model must
         # var olan LayerNorm'larina DOKUNMUYORUZ (yayinlanmis modellerle
-        # karsilastirilabilirlik icin tek degisiklik msg_norm olmali).
+        # for comparability the only change should be msg_norm).
         _n_ln = 0
         for _name, _mod in PLANET_model.named_modules():
             if isinstance(_mod, nn.LayerNorm):   # 2026-09-17: res_embedding dahil HEPSI
@@ -217,7 +216,7 @@ if __name__ == '__main__':
 
     total_step = args.initial_step
     meters = np.zeros(6)
-    # ── marj sayaclari + tekrarlanabilir jenerator ──
+    # -- margin counters and a reproducible generator --
     marj_gen = torch.Generator(device=device); marj_gen.manual_seed(args.seed + 12345)
     marj_meters = np.zeros(3); marj_n = 0
     mm_meters = np.zeros(3); mm_n = 0
@@ -229,7 +228,7 @@ if __name__ == '__main__':
               % (args.marj_lambda, args.marj, args.marj_oteleme_min, args.marj_oteleme_max,
                  args.marj_her_n, args.marj_baslangic), flush=True)
     beta = 0.0
-    stop_training = False  # YENİ
+    stop_training = False  # added
 
     PLANET_model.train()
     print("🚀 Eğitim Başlıyor...")
@@ -265,7 +264,7 @@ if __name__ == '__main__':
 
                 total_loss = loss_lig_w + loss_pl_w + loss_aff_w
 
-                # ── POZ MARJ: dogru poz, bozulmus pozdan en az `marj` kadar iyi olmali ──
+                # -- POSE MARGIN: the correct pose must score at least `marj` better than the perturbed one --
                 if (args.marj_lambda > 0 and total_step >= args.marj_baslangic
                         and total_step % args.marj_her_n == 0):
                     m_loss, m_fark, m_ihlal = margin_losses.pose_margin_loss(
@@ -463,7 +462,7 @@ if __name__ == '__main__':
 
                 PLANET_model.train()
 
-                # ── YENİ: max_step kontrolü ──
+                # -- added: max_step check --
                 if args.max_step and total_step >= args.max_step:
                     print(f"🏁 max_step ({args.max_step}) ulaşıldı, checkpoint kaydedildi, çıkılıyor.")
                     stop_training = True

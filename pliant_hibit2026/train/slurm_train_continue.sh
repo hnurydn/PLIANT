@@ -15,27 +15,28 @@
 #   TIP=esmuw -> [ABLASYON KOL 2, 2 Eki] ablasyon/train_pliant.py + pliant_esm_model
 #               (ESM+UW; vector attention + gating YOK; PYTHONPATH ABL:Y:G:BR:B:V:K:fixed_run)
 #   TIP=blosum -> [ABLASYON KOL 1] Baseline+UW: kol 2 + rezidu girisi BLOSUM 20 (veri ..._byer_blosum20)
-#   Kod: $KOD = Anzu'dan md5 dogrulamali kopya (anzu_kod_20261002). Veri: byer LMDB'nin Anzu md5'li kopyasi.
+#   Code: $KOD is an md5-verified copy of the workstation tree. Data: an md5-verified copy of the byer LMDB.
 #   ⛔ Egitim betiklerindeki SABIT TRUBA sys.path eklemeleri (Planet_model/Scripts, PLANET_FIXED_20260917)
 #      Anzu'da HIC calismiyordu (klasorler yok) -> TRUBA kopyasinda DEVRE DISI; kapi her modulu md5'le sinar.
-#   DEVAM: D icindeki en son TAM ckpt (N % 20000 == 0, optimizer dahil) bulunur; yoksa BAS_CKPT/BAS_ADIM.
-#   Ardisik is (afterany) ayni betikle kaldigi yerden surer; N >= MAXSTEP ise hemen cikar.
+#   RESUME: the latest COMPLETE checkpoint in D (N % 20000 == 0, optimizer included) is used;
+#   otherwise BAS_CKPT / BAS_ADIM. A follow-on job (afterany) continues with the same script from
+#   where it stopped, and exits immediately once N >= MAXSTEP.
 #   DUMAN=1 -> wandb kapali, ayri klasor, 15 dk sonra durur (wandb run'i kirletmeden dogrulama).
 # Env: TIP AD POZ BAS_CKPT BAS_ADIM WANDB_ID [MAXSTEP=500000] [DUMAN=0] [SEED=42] [MIN_DECOY=11]  (5 Eki: seed parametresi, varsayilan 42 = eski davranis)
-#   BAS_CKPT=YOK + BAS_ADIM=0 -> SIFIRDAN egitim (2 Eki karari: kontrastif kollar TRUBA'da bastan).
-#   WANDB_ID=YENI -> yeni wandb run (id egitim betigince olusturulur, D/wandb_run_id.txt'ye yazilir).
+#   BAS_CKPT=YOK with BAS_ADIM=0 trains FROM SCRATCH.
+#   WANDB_ID=YENI starts a new wandb run; the id is created by the training script and written to
+#   D/wandb_run_id.txt.
 set -u
 : "${TIP:?}"; : "${AD:?}"; : "${POZ:?}"; : "${BAS_CKPT:?}"; : "${BAS_ADIM:?}"; : "${WANDB_ID:?}"
 MAXSTEP=${MAXSTEP:-500000}; DUMAN=${DUMAN:-0}
 R=/arf/scratch/hnaydin/PLANET_ORIGINAL
 KOD=$R/anzu_kod_20261002
 P=$R/Planet_model/datasets/pdbbind2020/lmdb_planet_v2_cepte_prot_byer_anzu2
-OZN=512   # beklenen rezidu oznitelik boyutu (veri kapisi)
+OZN=512   # expected residue feature width, checked by the data gate below
 MD5=$R/kont_truba/aktarim/anzu_kod_md5.txt:$R/kont_truba/aktarim/ablasyon_md5.txt   # ':' ile birden cok liste
-ABL=$KOD/ablasyon; KT=$KOD/kontrastif; Y=$KOD/binderyer; G=$KOD/gerceketiket; BR=$KOD/birlesik; B=$KOD/bxc; V=$KOD/vgtop; K=$KOD/kapi; F=$KOD/fixed_run
+ABL=$KOD/ablasyon; Y=$KOD/binderyer; G=$KOD/gerceketiket; BR=$KOD/birlesik; B=$KOD/bxc; V=$KOD/vgtop; K=$KOD/kapi; F=$KOD/fixed_run
 case $TIP in
   byer) MOD=pliant_esm_pose_train_model; BETIK=$B/train_pliant_esm_pose.py; PP=$Y:$G:$BR:$B:$V:$K:$F; KONT=0; KARG="" ;;
-        KARG="--kont_lambda 1.0 --kont_tau 0.1" ;;
   esmuw) MOD=pliant_esm_model; BETIK=$ABL/train_pliant.py; PP=$ABL:$Y:$G:$BR:$B:$V:$K:$F; KONT=0; KARG="" ;;
   blosum) MOD=pliant_model; BETIK=$ABL/train_pliant.py; PP=$ABL:$Y:$G:$BR:$B:$V:$K:$F; KONT=0; KARG=""
           P=$R/Planet_model/datasets/pdbbind2020/lmdb_planet_v2_cepte_prot_byer_blosum20; OZN=20
@@ -81,12 +82,12 @@ sed -e 's|^    sys.path.insert(0, scripts_path)|    pass  # [TRUBA=ANZU] devre d
     $BETIK > $KOSU/$(basename $BETIK)
 [ $(grep -c "TRUBA=ANZU" $KOSU/$(basename $BETIK)) -eq 3 ] || { echo "HATA: yol yamasi tutmadi"; exit 8; }
 diff $BETIK $KOSU/$(basename $BETIK)
-# SERT KAPI: yuklenen HER proje modulu KOD altindan ve Anzu md5'iyle ayni mi?
+# HARD GATE: is every project module that gets imported loaded from $KOD, with a matching md5?
 cat > $KOSU/_dogrula.py <<'PYX'
 import os, sys, hashlib, importlib
 betik = sys.argv[1]
 src = open(betik, encoding='utf-8').read().split('def move_to_device')[0]
-exec(compile(src, betik, 'exec'))          # egitim betiginin import blogu (yol eklemeleri dahil)
+exec(compile(src, betik, 'exec'))          # the training script's import block, including path edits
 importlib.import_module(os.environ['MOD']); import margin_losses
 if os.environ['TIP'] == 'kont': import kont_kayip
 KOD = os.environ['KOD']
@@ -96,7 +97,7 @@ for liste in os.environ['MD5L'].split(':'):
         h, f = l.split(None, 1); md5[os.path.join(KOD, f.strip())] = h
 hata = 0; n = 0
 # 3 Eki: TRUBA'da conda ortami da /arf altinda (/arf/home/.../envs/pocketgen) -> stdlib'i atla;
-# __main__/__mp_main__ = bu kapinin kendisi. (Anzu'da ortam /media disinda oldugu icin gorulmemisti.)
+# __main__ / __mp_main__ is the gate script itself.
 _std = tuple(sorted({os.path.realpath(p) + os.sep for p in (sys.prefix, sys.base_prefix, sys.exec_prefix)}))
 for ad, m in sorted(sys.modules.items()):
     f = getattr(m, '__file__', None)
@@ -118,7 +119,8 @@ if os.environ['TIP'] in ('byer', 'esmuw', 'blosum') and getattr(d, 'KONT_GORUNUM
 if os.environ['TIP'] in ('esmuw', 'blosum'):
     L = sys.modules.get('layers_pliant_esm')
     if L is None or os.path.dirname(L.__file__) != os.path.join(KOD, 'ablasyon'): print('⛔ layers_pliant_esm yuklenmedi/yanlis'); hata += 1
-# VERI KAPISI: ilk 5 cebin rezidu oznitelik boyutu beklenenle ayni mi? (chemutils sessizce kirpar/tamamlar!)
+# DATA GATE: do the first five pockets carry the expected residue feature width? chemutils pads or
+# truncates a mismatched width silently, so this has to be checked explicitly.
 import lmdb, pickle, json as _j
 import numpy as _np
 _k = [r['key'] for r in _j.load(open(os.environ['VERI'] + '/train_meta.json'))][:5]
@@ -135,11 +137,12 @@ sys.exit(9 if hata else 0)
 PYX
 cd $KOSU
 TIP=$TIP MOD=$MOD KOD=$KOD MD5L=$MD5 VERI=$P OZN=$OZN python -u $KOSU/_dogrula.py $KOSU/$(basename $BETIK) || { echo "=== KAPI KALDI ==="; exit 9; }
-echo "✅ kapi gecti"
-# veriyi dugum diskine kopyala (meta JSON dahil; yol adinda 'esm2' OLMAMALI -> ckpt adi PLANET.iter-*)
-# 2 Eki: bellek olcumu (Anzu, ayni tarif): PSS toplam 9 GB, ana surec tepe 5 GB -> 48G = 9 + LMDB sayfa onbellegi ~13 + pay
+echo "gate passed"
+# copy the data to the node's local disk, including the meta JSON
+# memory measured with the same recipe: 9 GB PSS in total, 5 GB peak in the main process, hence
+# 48G = 9 + about 13 GB of LMDB page cache + headroom
 LOC=/tmp/hnaydin_kont_${SLURM_JOB_ID}
-trap 'rm -rf $LOC' EXIT          # walltime / scancel / hata: dugumde 13 GB cop birakma
+trap 'rm -rf $LOC' EXIT          # on walltime, scancel or failure, do not leave 13 GB behind on the node
 echo "/tmp: $(df -hT /tmp | tail -1)"
 [ "$(df -T /tmp | tail -1 | awk '{print $2}')" = "tmpfs" ] && echo "⚠️ /tmp tmpfs (RAM) -> 13 GB bellekten sayilir"
 bos=$(df -Pk /tmp | tail -1 | awk '{print $4}')

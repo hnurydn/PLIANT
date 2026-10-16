@@ -23,15 +23,15 @@ class PLANET(nn.Module):
         self.proteinegnn = ProteinEGNN(feature_dims, pro_update_inters, self.device)
         self.ligandgat = LigandGAT(feature_dims, nheads, key_dims, value_dims, lig_update_iters, self.device)
 
-        # ProLig: Artık geometrik hesaplamalar için koordinatları bekleyen yeni versiyonu çağırıyoruz
+        # ProLig: now calls the version that expects coordinates, for the geometric computations
         self.prolig = ProLig(feature_dims, nheads, pro_lig_update_iters, self.device)
 
-        # 2. Uncertainty Weighting (Belirsizlik Ağırlıklandırma) Parametreleri
+        # 2. Uncertainty weighting parameters
         self.log_sigma_lig = nn.Parameter(torch.tensor(0.0, device=self.device), requires_grad=True)
         self.log_sigma_pl = nn.Parameter(torch.tensor(0.0, device=self.device), requires_grad=True)
         self.log_sigma_affinity = nn.Parameter(torch.tensor(0.0, device=self.device), requires_grad=True)
 
-        # 3. Kayıp Fonksiyonları
+        # 3. Loss functions
         self.ligand_interaction_loss = nn.BCELoss(reduction='sum')
         self.pro_lig_interaction_loss = nn.BCELoss(reduction='sum')
         self.mse_loss = nn.MSELoss(reduction='none')
@@ -137,7 +137,7 @@ class PLANET(nn.Module):
     def load_parameters(self, parameters=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'PLANET.param')):
         self.load_state_dict(torch.load(parameters, map_location=self.device))
 
-    # --- Tarama (Screening) Yardımcı Fonksiyonları ---
+    # --- Screening helper functions ---
 
     def cal_res_features_helper(self, fresidues, coordinates):
         fresidues = fresidues.to(self.device)

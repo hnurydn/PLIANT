@@ -21,15 +21,15 @@ class PLANET(nn.Module):
         self.proteinegnn = ProteinEGNN(feature_dims, pro_update_inters, self.device)
         self.ligandgat = LigandGAT(feature_dims, nheads, key_dims, value_dims, lig_update_iters, self.device)
 
-        # ProLig: Artık geometrik hesaplamalar için koordinatları bekleyen yeni versiyonu çağırıyoruz
+        # ProLig: now calls the version that expects coordinates, for the geometric computations
         self.prolig = ProLig(feature_dims, nheads, pro_lig_update_iters, self.device)
 
-        # 2. Uncertainty Weighting (Belirsizlik Ağırlıklandırma) Parametreleri
+        # 2. Uncertainty weighting parameters
         self.log_sigma_lig = nn.Parameter(torch.tensor(0.0, device=self.device), requires_grad=True)
         self.log_sigma_pl = nn.Parameter(torch.tensor(0.0, device=self.device), requires_grad=True)
         self.log_sigma_affinity = nn.Parameter(torch.tensor(0.0, device=self.device), requires_grad=True)
 
-        # 3. Kayıp Fonksiyonları
+        # 3. Loss functions
         self.ligand_interaction_loss = nn.BCELoss(reduction='sum')
         self.pro_lig_interaction_loss = nn.BCELoss(reduction='sum')
         self.mse_loss = nn.MSELoss(reduction='none')
@@ -93,12 +93,12 @@ class PLANET(nn.Module):
 
             if complex_label == 1:
                 lig_interaction_loss.append(l_loss)
-                # [CEPTEMASK] decoy'un TEMAS kaybi MASKELENDI.
-                # Gerekce: decoy artik CEPTE (lmdb_planet_v2_cepte_prot), yani gercekten temas
-                # eden atomlari var; ona "tum temaslar 0" demek geometrik olarak YANLIS bir
-                # etiket ve modeli cakisma/imkansizlik kisayoluna itiyor. Decoy'un ogrenmeye
-                # katkisi artik TEMAS etiketinden degil, afinite MARJINDAN geliyor
-                # (margin_losses.molecule_margin_loss): y(binder) >= y(decoy) + marj.
+                # The decoy's CONTACT loss is MASKED here.
+                # Reason: decoys are now placed INSIDE the pocket, so they really do have atoms
+                # in contact. Telling the model "all contacts are 0" for them is a geometrically
+                # WRONG label and pushes it towards a clash / impossibility shortcut. A decoy's
+                # contribution to learning now comes from the affinity MARGIN rather than from the
+                # contact label (margin_losses.molecule_margin_loss): y(binder) >= y(decoy) + m.
                 pro_lig_interaction_loss.append(pl_loss)
 
             lig_interaction_count += lig_total_points
@@ -137,7 +137,7 @@ class PLANET(nn.Module):
     def load_parameters(self, parameters=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'PLANET.param')):
         self.load_state_dict(torch.load(parameters, map_location=self.device))
 
-    # --- Tarama (Screening) Yardımcı Fonksiyonları ---
+    # --- Screening helper functions ---
 
     def cal_res_features_helper(self, fresidues, coordinates):
         fresidues = fresidues.to(self.device)

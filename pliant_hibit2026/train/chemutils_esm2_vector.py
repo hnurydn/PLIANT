@@ -256,9 +256,8 @@ class Mol():
         return bonded_atom_pairs
 
 def random_ligand_decoy(protein_pockets,decoy_flag):
-    # NOT: Bu fonksiyon artık contrastive modelde (PLANET_datautils_esm2_vector.py)
-    # kullanılmıyor. Eski cross-protein batch tasarımına aitti.
-    # Sadece noESM/ESM2 modellerinin datautils'leri tarafından çağrılıyor.
+    # NOTE: this function is no longer used by the contrastive model; it belonged to the older
+    # cross-protein batch design. It is now only called by the datautils of the noESM / ESM-2 models.
     if decoy_flag:
         check = True
         while check:
@@ -305,9 +304,9 @@ def random_ligand_decoy(protein_pockets,decoy_flag):
     return pKs,pK_flags,complex_labels,mol_batch
 
 def tensorize_all(protein_pockets,decoy_flag=True):
-    # NOT: Bu fonksiyon artık contrastive modelde kullanılmıyor.
-    # Yeni protein-spesifik batch tasarımında _tensorize_train()
-    # doğrudan tensorize_protein_pocket() ve tensorize_ligand() çağırıyor.
+    # NOTE: this function is no longer used by the contrastive model. In the newer
+    # protein-specific batch design, _tensorize_train() calls tensorize_protein_pocket()
+    # and tensorize_ligand() directly.
     pKs,pK_flags,complex_labels,mol_batch = random_ligand_decoy(protein_pockets,decoy_flag)
     
     res_feature_batch = tensorize_protein_pocket(protein_pockets)
@@ -363,30 +362,30 @@ def tensorize_protein_pocket(protein_pockets):
     
     return (fresidues,res_map,res_scope,alpha_coordinates)
 
-# --- [GÜNCELLENDİ] tensorize_ligand ---
+# --- [UPDATED] tensorize_ligand ---
 def tensorize_ligand(mol_batch:List[Mol]):
-    # mol_batch_to_graph artık lig_coordinates (koordinatları) da döndürüyor
+    # mol_batch_to_graph now also returns lig_coordinates
     (fatoms, fbonds, agraph, bgraph, lig_scope, lig_coordinates) = mol_batch_to_graph([mol.mol for mol in mol_batch]) 
     
     mol_intearctions = [mol.get_interaction_label().reshape([-1]) for mol in mol_batch]
     mol_intearctions = torch.from_numpy(np.concatenate(mol_intearctions).astype(np.float32))
     
-    # 6. eleman olarak lig_coordinates'i de döndür
+    # return lig_coordinates as the sixth element
     return (fatoms, fbonds, agraph, bgraph, lig_scope, lig_coordinates), mol_intearctions   
 
 def tensorize_molecules(mol_batch:List[Chem.rdchem.Mol]):
-    # Burayı da güncelledik
+    # updated here as well
     (fatoms, fbonds, agraph, bgraph, lig_scope, lig_coordinates) = mol_batch_to_graph(mol_batch)
     return (fatoms, fbonds, agraph, bgraph, lig_scope, lig_coordinates)
 
-# --- [GÜNCELLENDİ] mol_batch_to_graph ---
+# --- [UPDATED] mol_batch_to_graph ---
 def mol_batch_to_graph(mol_batch:List[Chem.rdchem.Mol], auto_detect=True):
     padding = torch.zeros(ATOM_FDIM + BOND_FDIM)
     fatoms, fbonds = [], [padding] 
     in_bonds, all_bonds = [], [(-1,-1)] 
     lig_scope = []
     
-    # --- [YENİ] Ligand Koordinatları Listesi ---
+    # --- [ADDED] list of ligand coordinates ---
     lig_coordinates = [] 
     
     total_atoms = 0
@@ -395,11 +394,11 @@ def mol_batch_to_graph(mol_batch:List[Chem.rdchem.Mol], auto_detect=True):
         if auto_detect:
             Chem.rdmolops.AssignAtomChiralTagsFromStructure(mol)
         
-        # Conformer'ı al (3D Koordinatlar için)
+        # take the conformer (for the 3D coordinates)
         try:
             conf = mol.GetConformer()
         except:
-            # Conformer yoksa 0.0 ile doldur (Hata önleyici)
+            # if there is no conformer, fill with 0.0 as a guard
             # Bu genelde olmaz ama tedbir.
             conf = None
 
@@ -408,7 +407,7 @@ def mol_batch_to_graph(mol_batch:List[Chem.rdchem.Mol], auto_detect=True):
             fatoms.append(atom_features(atom))
             in_bonds.append([])
             
-            # --- [YENİ] Koordinatı Al ---
+            # --- [ADDED] take the coordinate ---
             if conf is not None:
                 pos = conf.GetAtomPosition(atom.GetIdx())
                 lig_coordinates.append([pos.x, pos.y, pos.z])
@@ -440,7 +439,7 @@ def mol_batch_to_graph(mol_batch:List[Chem.rdchem.Mol], auto_detect=True):
     agraph = torch.zeros(total_atoms,MAX_NB).long()
     bgraph = torch.zeros(total_bonds,MAX_NB).long()
     
-    # --- [YENİ] Koordinatları Tensöre Çevir ---
+    # --- [ADDED] convert the coordinates to a tensor ---
     lig_coordinates = torch.tensor(lig_coordinates, dtype=torch.float32)
 
     for a in range(total_atoms):
@@ -453,7 +452,7 @@ def mol_batch_to_graph(mol_batch:List[Chem.rdchem.Mol], auto_detect=True):
             if all_bonds[b2][0] != y:
                 bgraph[b1,i] = b2 
 
-    # 6. eleman olarak lig_coordinates dönüyor
+    # lig_coordinates is returned as the sixth element
     return (fatoms, fbonds, agraph, bgraph, lig_scope, lig_coordinates)
 
 def role_of_5(mol):
