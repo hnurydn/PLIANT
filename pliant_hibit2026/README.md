@@ -25,6 +25,13 @@ third. Training driver: [`train/PLANET_train_abl.py`](train/PLANET_train_abl.py)
 The 140k→700k continuation on the cluster was launched with
 [`train/sb_kont_truba.sh`](train/sb_kont_truba.sh).
 
+Supporting modules the training code imports, included here so the folder is
+self-contained: [`train/poz_marj.py`](train/poz_marj.py) (both margin losses —
+`marj_kaybi` for the pose margin and `molekul_marj_kaybi` for the binder/decoy
+margin), [`train/nnutils.py`](train/nnutils.py) and
+[`train/chemutils_esm2_vector.py`](train/chemutils_esm2_vector.py) (tensor and
+pocket/ligand featurisation helpers, both from the upstream PLANET codebase).
+
 **The first two variants are pose-blind by construction.** The only path from
 ligand coordinates to the predicted score is the distance bias inside vector
 attention (`ProteinLigandAttention.geo_bias`). Without it the model cannot
@@ -43,7 +50,7 @@ outside it:
 | Builds the LMDB consumed by training | [`decoys/lmdb_kur_cepte.py`](decoys/lmdb_kur_cepte.py) |
 | Launchers (the split is passed as `SPLIT=` at submit time) | [`decoys/sb_yer4.sh`](decoys/sb_yer4.sh), [`decoys/sb_yer_vt.sh`](decoys/sb_yer_vt.sh), [`decoys/sb_lmdb_cepte2.sh`](decoys/sb_lmdb_cepte2.sh), [`decoys/sb_lmdb_vt_cepte.sh`](decoys/sb_lmdb_vt_cepte.sh) |
 
-The two margin losses live in the `compute_loss` of each model module above: a
+The two margin losses are implemented in [`train/poz_marj.py`](train/poz_marj.py) and applied from the training driver: a
 binder must score at least 1 pK above a decoy in the same pocket, and a
 crystallographic pose at least 1 pK above the same ligand displaced by 1–3 Å.
 
