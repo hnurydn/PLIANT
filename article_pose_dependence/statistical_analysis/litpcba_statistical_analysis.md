@@ -12,7 +12,7 @@ or original) had been used?
 
 **Data sources:**
 - Centered: TRUBA `Planet_model/litpcba_results_centered/*.csv` (124 rows/model)
-- Original: **Anzu server** (10.199.2.9, VPN required — NOT on TRUBA),
+- Original: **Anzu server** (internal lab workstation, VPN required — NOT on TRUBA),
   `core6_results/` (6 models) + `missing4_results/` (4 models), 124 rows/model
 
 Both were filtered down to the same 15 selected (Target, Template) pairs

@@ -145,15 +145,9 @@ yeniden skorlamak için kullanılır; `eval_unified.py` bunların birleşik sür
 | Script | Partition | Süre | Çağırdığı .py | Anahtar kelimeler |
 |---|---|---|---|---|
 | `20_prepare_lit_pcba_pkl.sh` | barbun | 1-00:00:00 | 20_prepare_lit_pcba_pkl.py | pK, lit-pcba |
-| `deneme.sh` | hamsi | 2-00:00:00 | inference.py |  |
-| `fix_valid.sh` | barbun | 02:00:00 | create_lmdb.py | lmdb |
 | `planet_train.sh` | akya-cuda | 3-00:00:00 | PLANET_train_esm2_vector_gating_contrastive_loss.py | contrastive, vector_gating, ESM2, esm2, gating, lmdb |
-| `rclone.sh` | barbun | 1-00:00:00 | 07_generate_decoy_sdfs_deneme.py, 17_convert_decoys_inplace.py | decoy |
-| `temizle.sh` | akya-cuda | 3-00:00:00 | — |  |
-| `test.sh` | barbun | 00:05:00 | — |  |
 | `train.sh` | barbun-cuda | 3-00:00:00 | PLANET_train_esm2_vector_gating.py | vector_gating, ESM2, esm2, gating, lmdb, decoy |
 | `wandb_duzeltme.sh` | barbun | 3-00:00:00 | wandb_merge_all.py | wandb |
-| `zip_file.sh` | barbun | 1-00:00:00 | — | ESM2, esm2, lmdb, pK |
 
 ### `Dataset_preparation/` — kabuk/Slurm script'leri (29)
 
@@ -260,8 +254,6 @@ yeniden skorlamak için kullanılır; `eval_unified.py` bunların birleşik sür
 | Script | Satır | Amaç (docstring/yorum) | Sınıf/fonksiyon | Yerel import | Çağıran (.sh / .py) |
 |---|---|---|---|---|---|
 | `create_patched_chemutils.py` | 46 | — | main | — | — |
-| `debug_lit_pcba.py` | 93 | — | main | chemutils_dude | — |
-| `dosya_tasima.py` | 30 | — | — | — | — |
 | `wandb_duzeltme.py` | 334 | — | — | — | — |
 | `wandb_merge_all.py` | 195 | WandB PLANET runs merger ======================== Aynı modelin farklı checkpoint'lerden devam edilmiş runlarını NEW_PROJECT içinde tek bir "unified" run'a birle | log, fetch_run_df, process_model, main | — | wandb_duzeltme.sh |
 
