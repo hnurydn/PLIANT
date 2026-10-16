@@ -9,7 +9,7 @@ from rdkit import RDLogger
 import wandb
 from sklearn.metrics import roc_auc_score, average_precision_score, f1_score, precision_score, recall_score
 from scipy.stats import pearsonr, spearmanr
-import poz_marj   # 25 Eyl: poz marj kaybi
+import margin_losses   # 25 Eyl: poz marj kaybi
 # [ABLASYON 2 Eki 2026] PLANET_train_bxc.py kopyasi; TEK fark: gating'i olmayan modelde FUZYON loglamasi atlanir.
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -271,7 +271,7 @@ if __name__ == '__main__':
                 # ── POZ MARJ: dogru poz, bozulmus pozdan en az `marj` kadar iyi olmali ──
                 if (args.marj_lambda > 0 and total_step >= args.marj_baslangic
                         and total_step % args.marj_her_n == 0):
-                    m_loss, m_fark, m_ihlal = poz_marj.marj_kaybi(
+                    m_loss, m_fark, m_ihlal = margin_losses.pose_margin_loss(
                         PLANET_model, res_feature_batch, mol_feature_batch, targets,
                         marj_gen, predictions[2], marj=args.marj,
                         oteleme_min=args.marj_oteleme_min, oteleme_max=args.marj_oteleme_max)
@@ -280,7 +280,7 @@ if __name__ == '__main__':
                     marj_n += 1
 
                 if args.mol_marj_lambda > 0:
-                    mm_loss, mm_fark, mm_ihlal = poz_marj.molekul_marj_kaybi(
+                    mm_loss, mm_fark, mm_ihlal = margin_losses.molecule_margin_loss(
                         predictions[2], targets, marj=args.mol_marj)
                     total_loss = total_loss + args.mol_marj_lambda * mm_loss
                     mm_meters += np.array([mm_loss.item(), mm_fark.item(), mm_ihlal.item()])

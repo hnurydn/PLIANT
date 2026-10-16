@@ -67,7 +67,7 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export CUDA_VISIBLE_DEVICES=""   # debug GPU dugumlerinde sessiz cuda hatasi (22 Eyl)
 export WANDB_MODE=disabled
 
-python -u "$CODE/LITPCBA_dualchannel.py" \
+python -u "$CODE/screen_litpcba.py" \
     --model_module "$MODMOD" \
     --helper_module LITPCBA_benchmark_lmdb \
     --code_paths "/arf/scratch/hnaydin/PLANET_ORIGINAL/kapi,$CODE,$EXP,$BASE/Scripts,/arf/scratch/hnaydin/PLANET_ORIGINAL/vgtop,/arf/scratch/hnaydin/PLANET_ORIGINAL/orjkol,/arf/scratch/hnaydin/PLANET_ORIGINAL/ceptemask,/arf/scratch/hnaydin/PLANET_ORIGINAL/birlesik,/arf/scratch/hnaydin/PLANET_ORIGINAL/anzu_kod_20261002/ablasyon" \

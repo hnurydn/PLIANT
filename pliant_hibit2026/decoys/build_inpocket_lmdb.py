@@ -6,7 +6,7 @@ Cikti  : lmdb_planet_v2_cepte/{split}.lmdb   (KIP=cepte)  -> decoy koordinatlari
          lmdb_planet_v2_ilk100/{split}.lmdb  (KIP=kirp)   -> ESKI uzak koordinatlar, ayni decoy alt kumesi
                                                              (decoy sayisi eslenmis KONTROL kolu)
 Her iki kipte de decoy listesi yerlestirilen alt kumeye kirpilir; meta n_decoys guncellenir.
-Kullanim: SPLIT=core KIP=cepte python -u lmdb_kur_cepte.py
+Kullanim: SPLIT=core KIP=cepte python -u build_inpocket_lmdb.py
 """
 import os, sys, json, pickle, time
 import numpy as np

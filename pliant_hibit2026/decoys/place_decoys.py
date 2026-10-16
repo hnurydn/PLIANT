@@ -5,7 +5,7 @@ Her decoy: geometrik yerleştirme (yarıçap tabanlı, v3) → Vina YEREL optimi
 poz KOORDİNAT EŞLEŞTİRMEYLE geri yazılır (atom sırasına güvenilmez, bkz. 18 Eyl testi).
 İş birimi = (cep, decoy dilimi). Dilimler ortak bir kuyruktan flock ile alınır → kuyruk sorunu yok,
 işler sonradan eklenebilir.  Çıktı: yerlesim/son/<split>_<key>_<start>.npz  (+ enerjiler, çakışma)
-Kullanım: SPLIT=train NPROC=56 python -u yerlesim_gecis4.py
+Kullanım: SPLIT=train NPROC=56 python -u place_decoys.py
 """
 import sys, os, time, json, pickle, subprocess, tempfile, fcntl
 import numpy as np
@@ -16,7 +16,7 @@ from rdkit import Chem, RDLogger
 from rdkit.Geometry import Point3D
 RDLogger.DisableLog('rdApp.*')
 from vina import Vina
-from cepte_yerlestir3 import yerlestir_v3, yaricap
+from inpocket_placement import place_in_pocket, vdw_radius
 from multiprocessing import Pool
 
 OB = "/arf/home/hnaydin/miniconda3/envs/pocketgen/bin/obabel"
@@ -156,7 +156,7 @@ def isci(_):
                         if e not in AD_OK and e[:1] not in AD_OK: continue
                         cep.append([float(l[30:38]), float(l[38:46]), float(l[46:54])]); cep_el.append(e if e in AD_OK else e[:1])
                     w.write(l)
-            cep = np.array(cep); r_cep = yaricap(cep_el)
+            cep = np.array(cep); r_cep = vdw_radius(cep_el)
             lig = obj.ligand.mol; lp = lig.GetConformer().GetPositions(); ref = lp.mean(0)
             subprocess.run([OB, f"{tmp}/r.pdb", "-xr", "-h", "-O", f"{tmp}/r.pdbqt"], capture_output=True)
             v, vina_ok = None, False
@@ -176,7 +176,7 @@ def isci(_):
                 agir = np.array([at.GetAtomicNum() > 1 for at in m.GetAtoms()])
                 ty = time.time()
                 try:
-                    x, E, cak, tem, sap = yerlestir_v3(x0, agir, yaricap(sym)[agir], cep, r_cep, ref, rng,
+                    x, E, cak, tem, sap = place_in_pocket(x0, agir, vdw_radius(sym)[agir], cep, r_cep, ref, rng,
                                                        F=0.85, ALFA=0.05, n_aday=int(os.environ.get("NADAY", "64")), n_baslangic=1, n_adim=25)
                 except Exception:
                     continue

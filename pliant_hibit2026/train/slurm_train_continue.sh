@@ -11,9 +11,8 @@
 #SBATCH -A hnaydin
 #SBATCH --chdir=/arf/scratch/hnaydin/PLANET_ORIGINAL/kont_truba
 # ═══ 2 Eki 2026: Anzu kollarinin TRUBA'da DEVAMI (Anzu run_byer.sh / run_kont.sh ile BIREBIR) ═══
-#   TIP=byer -> PLANET_train_bxc.py  + PLANET_model_esm2_vg_orj_gercek  (PYTHONPATH Y:G:BR:B:V:K:fixed_run)
-#   TIP=kont -> PLANET_train_kont.py + PLANET_model_esm2_vg_orj_kont    (PYTHONPATH KT:Y:G:BR:B:V:K:fixed_run)
-#   TIP=esmuw -> [ABLASYON KOL 2, 2 Eki] ablasyon/PLANET_train_abl.py + PLANET_model_esm2_uw_orj_gercek
+#   TIP=byer -> train_pliant_esm_pose.py  + pliant_esm_pose_train_model  (PYTHONPATH Y:G:BR:B:V:K:fixed_run)
+#   TIP=esmuw -> [ABLASYON KOL 2, 2 Eki] ablasyon/train_pliant.py + pliant_esm_model
 #               (ESM+UW; vector attention + gating YOK; PYTHONPATH ABL:Y:G:BR:B:V:K:fixed_run)
 #   TIP=blosum -> [ABLASYON KOL 1] Baseline+UW: kol 2 + rezidu girisi BLOSUM 20 (veri ..._byer_blosum20)
 #   Kod: $KOD = Anzu'dan md5 dogrulamali kopya (anzu_kod_20261002). Veri: byer LMDB'nin Anzu md5'li kopyasi.
@@ -35,11 +34,10 @@ OZN=512   # beklenen rezidu oznitelik boyutu (veri kapisi)
 MD5=$R/kont_truba/aktarim/anzu_kod_md5.txt:$R/kont_truba/aktarim/ablasyon_md5.txt   # ':' ile birden cok liste
 ABL=$KOD/ablasyon; KT=$KOD/kontrastif; Y=$KOD/binderyer; G=$KOD/gerceketiket; BR=$KOD/birlesik; B=$KOD/bxc; V=$KOD/vgtop; K=$KOD/kapi; F=$KOD/fixed_run
 case $TIP in
-  byer) MOD=PLANET_model_esm2_vg_orj_gercek; BETIK=$B/PLANET_train_bxc.py; PP=$Y:$G:$BR:$B:$V:$K:$F; KONT=0; KARG="" ;;
-  kont) MOD=PLANET_model_esm2_vg_orj_kont;   BETIK=$KT/PLANET_train_kont.py; PP=$KT:$Y:$G:$BR:$B:$V:$K:$F; KONT=1
+  byer) MOD=pliant_esm_pose_train_model; BETIK=$B/train_pliant_esm_pose.py; PP=$Y:$G:$BR:$B:$V:$K:$F; KONT=0; KARG="" ;;
         KARG="--kont_lambda 1.0 --kont_tau 0.1" ;;
-  esmuw) MOD=PLANET_model_esm2_uw_orj_gercek; BETIK=$ABL/PLANET_train_abl.py; PP=$ABL:$Y:$G:$BR:$B:$V:$K:$F; KONT=0; KARG="" ;;
-  blosum) MOD=PLANET_model_blosum_uw_orj_gercek; BETIK=$ABL/PLANET_train_abl.py; PP=$ABL:$Y:$G:$BR:$B:$V:$K:$F; KONT=0; KARG=""
+  esmuw) MOD=pliant_esm_model; BETIK=$ABL/train_pliant.py; PP=$ABL:$Y:$G:$BR:$B:$V:$K:$F; KONT=0; KARG="" ;;
+  blosum) MOD=pliant_model; BETIK=$ABL/train_pliant.py; PP=$ABL:$Y:$G:$BR:$B:$V:$K:$F; KONT=0; KARG=""
           P=$R/Planet_model/datasets/pdbbind2020/lmdb_planet_v2_cepte_prot_byer_blosum20; OZN=20
           [ -f $P/DONUSUM.json ] || { echo "HATA: $P/DONUSUM.json yok"; exit 3; } ;;
   *) echo "HATA TIP"; exit 2 ;;
@@ -89,7 +87,7 @@ import os, sys, hashlib, importlib
 betik = sys.argv[1]
 src = open(betik, encoding='utf-8').read().split('def move_to_device')[0]
 exec(compile(src, betik, 'exec'))          # egitim betiginin import blogu (yol eklemeleri dahil)
-importlib.import_module(os.environ['MOD']); import poz_marj
+importlib.import_module(os.environ['MOD']); import margin_losses
 if os.environ['TIP'] == 'kont': import kont_kayip
 KOD = os.environ['KOD']
 md5 = {}
@@ -118,8 +116,8 @@ if abs(d.BINDER_POZ_ORAN - float(os.environ['BINDER_POZ_ORAN'])) > 1e-9 or d.DEC
 if os.environ['TIP'] == 'kont' and d.KONT_GORUNUM is not True: hata += 1
 if os.environ['TIP'] in ('byer', 'esmuw', 'blosum') and getattr(d, 'KONT_GORUNUM', False): hata += 1
 if os.environ['TIP'] in ('esmuw', 'blosum'):
-    L = sys.modules.get('layers_esm2_uw_orj')
-    if L is None or os.path.dirname(L.__file__) != os.path.join(KOD, 'ablasyon'): print('⛔ layers_esm2_uw_orj yuklenmedi/yanlis'); hata += 1
+    L = sys.modules.get('layers_pliant_esm')
+    if L is None or os.path.dirname(L.__file__) != os.path.join(KOD, 'ablasyon'): print('⛔ layers_pliant_esm yuklenmedi/yanlis'); hata += 1
 # VERI KAPISI: ilk 5 cebin rezidu oznitelik boyutu beklenenle ayni mi? (chemutils sessizce kirpar/tamamlar!)
 import lmdb, pickle, json as _j
 import numpy as _np

@@ -31,7 +31,7 @@ echo "LMDB yerel kopya: $(( $(date +%s)-t0 )) sn  boyut: $(du -sh $LOC/${SPLIT}.
 export LMDB_DIR=$LOC
 echo "SPLIT=$SPLIT  MAXDEC=$MAXDEC  mem=120G  host=$(hostname)  $(date)"
 free -g | head -2
-python -u yerlesim_gecis4.py
+python -u place_decoys.py
 rc=$?
 echo "--- is sonu bellek"
 free -g | head -2

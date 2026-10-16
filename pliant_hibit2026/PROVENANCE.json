@@ -1,0 +1,120 @@
+{
+  "pliant_model.py": {
+    "original_cluster_filename": "PLANET_model_blosum_uw_orj_gercek.py",
+    "md5": "fb961311bcf9e93c71903cc51fe6c994"
+  },
+  "pliant_esm_model.py": {
+    "original_cluster_filename": "PLANET_model_esm2_uw_orj_gercek.py",
+    "md5": "e099a486dad29e0fd98d5032205c278c"
+  },
+  "pliant_esm_pose_model.py": {
+    "original_cluster_filename": "PLANET_model_esm2_vg_orj_ceptemask.py",
+    "md5": "190c028f8605aaa7e7bb525d47bdb639"
+  },
+  "layers_pliant_esm.py": {
+    "original_cluster_filename": "layers_esm2_uw_orj.py",
+    "md5": "b6a4fd31ae5af0d5d4a2259628e9a117"
+  },
+  "layers_pliant_esm_pose.py": {
+    "original_cluster_filename": "layers_esm2_vg_orj.py",
+    "md5": "687ed1c6ef12d65a80366ef826d07dcf"
+  },
+  "train_pliant.py": {
+    "original_cluster_filename": "PLANET_train_abl.py",
+    "md5": "a46e0a3637bad1e608db0c922b2d5257"
+  },
+  "margin_losses.py": {
+    "original_cluster_filename": "poz_marj.py",
+    "md5": "3040fff507bf6a2480c1bfb9213d7a95"
+  },
+  "slurm_train_continue.sh": {
+    "original_cluster_filename": "sb_kont_truba.sh",
+    "md5": "2d3dcd19134dbb0050adb958f5afb160"
+  },
+  "inpocket_placement.py": {
+    "original_cluster_filename": "cepte_yerlestir3.py",
+    "md5": "73be78f17c956a643394de09b24d217c"
+  },
+  "place_decoys.py": {
+    "original_cluster_filename": "yerlesim_gecis4.py",
+    "md5": "4488849346f68b9eeafa10aeebf9c39d"
+  },
+  "build_inpocket_lmdb.py": {
+    "original_cluster_filename": "lmdb_kur_cepte.py",
+    "md5": "ff5ff9c51aaa5d60449021b8d2164b59"
+  },
+  "slurm_place_decoys.sh": {
+    "original_cluster_filename": "sb_yer4.sh",
+    "md5": "9b0e9095ff519b445902e1853194961f"
+  },
+  "slurm_place_decoys_valid.sh": {
+    "original_cluster_filename": "sb_yer_vt.sh",
+    "md5": "883f9e3bc3f0643bd865f444b129d087"
+  },
+  "slurm_build_lmdb.sh": {
+    "original_cluster_filename": "sb_lmdb_cepte2.sh",
+    "md5": "72c85568de4720be75daecdf9f718b85"
+  },
+  "slurm_build_lmdb_valid.sh": {
+    "original_cluster_filename": "sb_lmdb_vt_cepte.sh",
+    "md5": "0253eb14f78781163401e0f0309e5c41"
+  },
+  "eval_docking_power.py": {
+    "original_cluster_filename": "eval_dp_v2.py",
+    "md5": "f11adf12d5fd22fb05b4b9715e65bcfa"
+  },
+  "eval_contact_auroc.py": {
+    "original_cluster_filename": "eval_temas_binder.py",
+    "md5": "95fa4d08db28797b3d8369c06f70a214"
+  },
+  "screen_dude.py": {
+    "original_cluster_filename": "DUDE_dualchannel_skor.py",
+    "md5": "7b2a5efc1a92a6df8a43e11215d931ef"
+  },
+  "screen_litpcba.py": {
+    "original_cluster_filename": "LITPCBA_dualchannel.py",
+    "md5": "3fe66b17842516ee8aa9c86aef3edc49"
+  },
+  "slurm_screen_dude.sh": {
+    "original_cluster_filename": "dude_abl.sh",
+    "md5": "f5ad7aa0df3561fb998229f0a85074b9"
+  },
+  "slurm_screen_litpcba.sh": {
+    "original_cluster_filename": "litpcba_abl.sh",
+    "md5": "616afc9091942554c484a5797b908e42"
+  },
+  "slurm_docking_power_pose.sh": {
+    "original_cluster_filename": "sb_dp_v2_b700.sh",
+    "md5": "337f0a689fa49564d09e5376e92e5192"
+  },
+  "slurm_docking_power_esm.sh": {
+    "original_cluster_filename": "sb_dp_v2_uw700.sh",
+    "md5": "772e1e540fb64afd0aaa234936c95ef0"
+  },
+  "slurm_docking_power_baseline.sh": {
+    "original_cluster_filename": "sb_abl1_dp.sh",
+    "md5": "d6d5f5eb825a51b1ec76cf67e68ed488"
+  },
+  "slurm_contact_auroc.sh": {
+    "original_cluster_filename": "sb_temas_700k.sh",
+    "md5": "5efc0515b13a4bf9a96b1794ddd94f9a"
+  },
+  "pliant_esm_pose_train_model.py": {
+    "original_cluster_filename": "PLANET_model_esm2_vg_orj_gercek.py",
+    "md5": "3c4bc7fa349221f3de66b89536b31eb7"
+  },
+  "train_pliant_esm_pose.py": {
+    "original_cluster_filename": "PLANET_train_bxc.py",
+    "md5": "bcbdf9f649dd139d17f6bcead8043a4b"
+  },
+  "nnutils.py": {
+    "original_cluster_filename": "nnutils.py",
+    "md5": "591ef4b3dad317fa233356fb15a0c8cb",
+    "note": "unchanged upstream PLANET helper; name kept"
+  },
+  "chemutils_esm2_vector.py": {
+    "original_cluster_filename": "chemutils_esm2_vector.py",
+    "md5": "575a2e755785174ebebdfbaddae01fad",
+    "note": "unchanged upstream PLANET helper; name kept"
+  }
+}

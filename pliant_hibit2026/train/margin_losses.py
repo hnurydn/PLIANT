@@ -33,7 +33,7 @@ NE YAPAR
 
 MODEL SINIFI DEGISMEZ
   Yeni parametre (ornegin 4. bir log_sigma) EKLENMEZ -> checkpoint anahtarlari ayni kalir,
-  mevcut degerlendirme scriptleri (eval_dp_v2 / eval_temas_binder / casf_afinite_kristal /
+  mevcut degerlendirme scriptleri (eval_docking_power / eval_contact_auroc / casf_afinite_kristal /
   eval_mesafe_taramasi) hicbir degisiklik olmadan bu kolu okur. Marj terimi sabit agirlikla
   (lambda) toplam kayba eklenir.
 """
@@ -77,7 +77,7 @@ def bozuk_lig_koordinatlari(lig_coords, lig_scope, gen,
     return yeni
 
 
-def marj_kaybi(model, res_batch, mol_batch, targets, gen, tahmin_poz,
+def pose_margin_loss(model, res_batch, mol_batch, targets, gen, tahmin_poz,
                marj=1.0, oteleme_min=1.0, oteleme_max=3.0, yalniz_binder=True):
     """Kristal poz ile bozulmus poz arasinda hinge. (kayip, ortalama_fark, ihlal_orani) doner.
 
@@ -118,7 +118,7 @@ def marj_kaybi(model, res_batch, mol_batch, targets, gen, tahmin_poz,
     return kayip, fark.mean().detach(), (fark < marj).float().mean().detach()
 
 
-def molekul_marj_kaybi(tahmin_afinite, targets, marj=1.0):
+def molecule_margin_loss(tahmin_afinite, targets, marj=1.0):
     """MOLEKUL marji: ayni cep grubunda  y(binder) >= y(decoy) + marj.
 
     Poz marjindan FARKI: orada ayni molekulun dogru/bozuk POZU kiyaslaniyordu; burada ayni

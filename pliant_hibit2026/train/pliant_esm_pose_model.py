@@ -10,12 +10,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # import satırı (layers_esm2_vector_gating_normalized'dan yükleniyor, bkz. o
 # dosyanın başındaki açıklama). Model sınıfının kendisi hiç değişmedi.
 # ═══════════════════════════════════════════════════════════════════════════
-# [ABLASYON KOL 2 — 2 Eki 2026] PLANET_model_esm2_vg_orj_gercek.py kopyasi; TEK fark katman modulu:
-# layers_esm2_uw_orj (vector attention + gating YOK). Kayip/compute_loss/UW (log_sigma) BIREBIR.
-from layers_esm2_uw_orj import ProteinEGNN, LigandGAT, ProLig
+from layers_pliant_esm_pose import ProteinEGNN, LigandGAT, ProLig
 from nnutils import create_var, create_var_gpu
 
-# GERCEKETIKET kolu: CEPTEMASK modelinin kopyasi, tek fark decoy temas kaybi maskesiz.
 class PLANET(nn.Module):
     def __init__(self, feature_dims, nheads, key_dims, value_dims, pro_update_inters, lig_update_iters, pro_lig_update_iters, device):
         super().__init__()
@@ -98,11 +95,13 @@ class PLANET(nn.Module):
 
             if complex_label == 1:
                 lig_interaction_loss.append(l_loss)
-            # [GERCEKETIKET 30 Eyl] decoy'un TEMAS kaybi ARTIK MASKELI DEGIL.
-            # Etiket datautils'te yerlestirilmis pozdan 4,0 A kurali ile hesaplaniyor
-            # (DECOY_ETIKET=gercek), dolayisiyla geometrik olarak DOGRU. CEPTEMASK'in
-            # maskeleme gerekcesi (yanlis sifir etiket) ortadan kalkti.
-            pro_lig_interaction_loss.append(pl_loss)
+                # [CEPTEMASK] decoy'un TEMAS kaybi MASKELENDI.
+                # Gerekce: decoy artik CEPTE (lmdb_planet_v2_cepte_prot), yani gercekten temas
+                # eden atomlari var; ona "tum temaslar 0" demek geometrik olarak YANLIS bir
+                # etiket ve modeli cakisma/imkansizlik kisayoluna itiyor. Decoy'un ogrenmeye
+                # katkisi artik TEMAS etiketinden degil, afinite MARJINDAN geliyor
+                # (margin_losses.molecule_margin_loss): y(binder) >= y(decoy) + marj.
+                pro_lig_interaction_loss.append(pl_loss)
 
             lig_interaction_count += lig_total_points
             pro_lig_interaction_count += pl_total_points

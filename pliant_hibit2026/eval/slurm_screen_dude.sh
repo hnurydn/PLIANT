@@ -6,7 +6,7 @@
 # sumaff_dude_array.sh -- SUMAFF deneyi: ORT vs TOP kolu, DUD-E @ITER (18 Eyl 2026)
 # bench24_dude_array.sh'in kopyasi (MERKEZSIZ, 101 hedef, N parca). FARKLAR:
 #   - checkpoint: sumaff_dude/ckpt/$ARM/PLANET.iter-$ITER (Anzu'dan aktarildi, md5 dogrulandi)
-#   - script: DUDE_dualchannel_skor.py (ligand basi skor + atom sayisi .npz kaydeder)
+#   - script: screen_dude.py (ligand basi skor + atom sayisi .npz kaydeder)
 #   - cikti: sumaff_dude/out/
 #   sbatch --job-name=d24s_TOP --array=0-5 \
 #     --export=ALL,ARM=TOP,MODMOD=PLANET_model_gatenorm_sumaff,ITER=100000 sumaff_dude_array.sh
@@ -55,7 +55,7 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export WANDB_MODE=disabled
 export CUDA_VISIBLE_DEVICES=""   # 22 Eyl: debug GPU dugumlerinde create_var tensoru cuda ya tasiyordu -> sessiz hata
 
-python -u "$MY/DUDE_dualchannel_skor.py" \
+python -u "$MY/screen_dude.py" \
     --model_module "$MODMOD" \
     --helper_module DUDE_benchmark_unified \
     --code_paths "/arf/scratch/hnaydin/PLANET_ORIGINAL/kapi,$MY,$CODE,$EXP,$BASE/Scripts,/arf/scratch/hnaydin/PLANET_ORIGINAL/vgtop,/arf/scratch/hnaydin/PLANET_ORIGINAL/orjkol,/arf/scratch/hnaydin/PLANET_ORIGINAL/ceptemask,/arf/scratch/hnaydin/PLANET_ORIGINAL/birlesik,/arf/scratch/hnaydin/PLANET_ORIGINAL/anzu_kod_20261002/ablasyon" \

@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # ═══════════════════════════════════════════════════════════════════════════
 # [ABLASYON KOL 1 — 2 Eki 2026] Baseline + UW  (ESM YOK, vector attention YOK, gating YOK)
-# = PLANET_model_esm2_uw_orj_gercek (KOL 2) ile AYNI mimari; TEK fark rezidu girisi:
+# = pliant_esm_model (KOL 2) ile AYNI mimari; TEK fark rezidu girisi:
 #     ESM2 (512)  ->  BLOSUM62 (20)   [veri: lmdb_planet_v2_cepte_prot_byer_blosum20]
 #   res_embedding = Linear(20, d, bias=False) -> LeakyReLU(0.1)   (LayerNorm YOK)
 #   3 Eki kullanici karari: tez baseline'i (Scripts/layers.py:263) ile BIREBIR. Kol 2'deki
@@ -22,7 +22,7 @@ import chemutils_esm2_vector as _CU
 REZIDU_BOYUT = 20
 _CU.FEATURE_DIM = REZIDU_BOYUT
 
-from PLANET_model_esm2_uw_orj_gercek import PLANET as _PLANET_KOL2
+from pliant_esm_model import PLANET as _PLANET_KOL2
 
 
 class PLANET(_PLANET_KOL2):

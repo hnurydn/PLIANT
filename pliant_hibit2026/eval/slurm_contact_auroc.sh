@@ -10,19 +10,19 @@
 #SBATCH --error=/arf/scratch/hnaydin/PLANET_ORIGINAL/casf_dock/dp_v2/logs/temas_%A_%a.err
 #SBATCH -A hnaydin
 #SBATCH --chdir=/arf/scratch/hnaydin/PLANET_ORIGINAL
-# Dizi indeksi -> model etiketi (eval_dp_v2.py MODELS sirasi). Duman testi: LIMIT=3 ve --array ile birkac indeks.
+# Dizi indeksi -> model etiketi (eval_docking_power.py MODELS sirasi). Duman testi: LIMIT=3 ve --array ile birkac indeks.
 KOLLAR=(BYER0_700k ABL2_P0_700k KONT0_700k_ayik)
 KOL=${KOLLAR[$SLURM_ARRAY_TASK_ID]}
 source /arf/home/hnaydin/miniconda3/etc/profile.d/conda.sh
 conda activate /arf/home/hnaydin/miniconda3/envs/pocketgen
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export CUDA_VISIBLE_DEVICES=""
-export PYTHONPATH=/arf/scratch/hnaydin/PLANET_ORIGINAL/anzu_kod_ikinci/ablasyon:/arf/scratch/hnaydin/PLANET_ORIGINAL/birlesik:/arf/scratch/hnaydin/PLANET_ORIGINAL/vgtop:$PYTHONPATH   # birlesik modulu (layers_esm2_vg_orj ayni dizinde)
+export PYTHONPATH=/arf/scratch/hnaydin/PLANET_ORIGINAL/anzu_kod_ikinci/ablasyon:/arf/scratch/hnaydin/PLANET_ORIGINAL/birlesik:/arf/scratch/hnaydin/PLANET_ORIGINAL/vgtop:$PYTHONPATH   # birlesik modulu (layers_pliant_esm_pose ayni dizinde)
 echo "=== $KOL  $(hostname)  $(date) ==="
 if [ -n "$LIMIT" ]; then
-  PLANET_ARCH=$KOL python -u casf_dock/dp_v2/eval_temas_binder.py --limit $LIMIT
+  PLANET_ARCH=$KOL python -u casf_dock/dp_v2/eval_contact_auroc.py --limit $LIMIT
 else
-  PLANET_ARCH=$KOL python -u casf_dock/dp_v2/eval_temas_binder.py
+  PLANET_ARCH=$KOL python -u casf_dock/dp_v2/eval_contact_auroc.py
 fi
 rc=$?
 echo "=== Bitti rc=$rc $(date) ==="

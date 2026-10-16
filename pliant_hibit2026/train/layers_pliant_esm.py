@@ -7,7 +7,7 @@ from nnutils import create_var
 from nnutils import index_select_ND
 
 # ═══════════════════════════════════════════════════════════════════════════
-# [ABLASYON KOL 2 — 2 Eki 2026] layers_esm2_uw_orj.py = layers_esm2_vg_orj.py (BYER0 / guncel tarif) kopyasi.
+# [ABLASYON KOL 2 — 2 Eki 2026] layers_pliant_esm.py = layers_pliant_esm_pose.py (BYER0 / guncel tarif) kopyasi.
 # Makale merdiveni: 1 Baseline+UW -> 2 +ESM (BU DOSYA) -> 3 +vector attention+gating (BYER0) -> 4 +kontrastif.
 # vg_orj'dan YALNIZ IKI FARK:
 #   (a) ProteinLigandAttention: VECTOR ATTENTION (geo_bias = geo_mlp(rbf(mesafe) + yon)) CIKARILDI.

@@ -14,12 +14,12 @@ Kosullar (etiket HER ZAMAN kristal pozdan):
                 modelde dusus = katkinin "geometriyi okuma" kismi.
 Metrik: tum ciftler havuzlanmis AUROC (makaledeki gibi) + kompleks basi AUROC ortalamasi.
 Veri: casf_dock/<v1|v2>/<pdb>.pkl (CASF-2016 coreset, ComplexPocket; ligand + pro_lig_interaction)
-Kullanim: PLANET_ARCH=<etiket> python -u eval_temas_binder.py [--limit N]
+Kullanim: PLANET_ARCH=<etiket> python -u eval_contact_auroc.py [--limit N]
 """
 import os, sys, json, pickle, argparse
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import eval_dp_v2 as E          # MODELS, load_model, score_full (ayni yollar, ayni birlestirme)
+import eval_docking_power as E          # MODELS, load_model, score_full (ayni yollar, ayni birlestirme)
 
 KAY = [("kay2", 2.0), ("kay4", 4.0)]
 N_TEKRAR = 3
@@ -53,7 +53,7 @@ def main():
     for n, pid in enumerate(ids, 1):
         try:
             obj = pickle.load(open(os.path.join(E.POCK, kind, pid + ".pkl"), "rb"))
-            E.cep_blosum(obj)
+            E.pocket_to_blosum(obj)
             lab = np.asarray(obj.pro_lig_interaction, dtype=np.float32)
             m0 = Chem.Mol(obj.ligand.mol)
             Chem.rdmolops.AssignAtomChiralTagsFromStructure(m0)   # kiralite kristal pozdan, bir kez

@@ -23,9 +23,9 @@ echo "=== $KOL IS=$IS BLOSUM=$PLANET_BLOSUM $(hostname) $(date) ==="
 L=""; [ -n "${LIMIT:-}" ] && L="--limit $LIMIT"
 if [ "$IS" = "dp" ]; then
   O=${LIMIT:+duman_}dp_v2_${KOL}.json
-  PLANET_ARCH=$KOL PLANET_OUT=$O python -u casf_dock/dp_v2/eval_dp_v2.py $L
+  PLANET_ARCH=$KOL PLANET_OUT=$O python -u casf_dock/dp_v2/eval_docking_power.py $L
 else
-  PLANET_ARCH=$KOL python -u casf_dock/dp_v2/eval_temas_binder.py $L
+  PLANET_ARCH=$KOL python -u casf_dock/dp_v2/eval_contact_auroc.py $L
 fi
 rc=$?
 echo "=== Bitti rc=$rc $(date) ==="

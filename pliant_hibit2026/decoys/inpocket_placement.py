@@ -13,7 +13,7 @@ VARSAYILAN = 1.70
 LAMBDA = 50.0
 
 
-def yaricap(elementler):
+def vdw_radius(elementler):
     return np.array([VDW.get(str(e).upper(), VARSAYILAN) for e in elementler], dtype=float)
 
 
@@ -45,7 +45,7 @@ def olc(x_agir, r_lig, cep, r_cep, F, temas_ust=1.45):
     return cak, tem
 
 
-def yerlestir_v3(x0, agir, r_lig_agir, cep, r_cep, ref, rng, F=0.85, ALFA=0.05, RMAX=3.0,
+def place_in_pocket(x0, agir, r_lig_agir, cep, r_cep, ref, rng, F=0.85, ALFA=0.05, RMAX=3.0,
                  n_aday=200, n_baslangic=3, n_adim=60, jit=1.5):
     merkezli = x0 - x0.mean(0)
     R = rastgele_donusler(n_aday, rng)

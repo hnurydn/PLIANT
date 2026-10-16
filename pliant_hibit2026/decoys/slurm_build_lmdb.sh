@@ -23,7 +23,7 @@ rm -rf $D/core.lmdb $D/valid.lmdb $D/train.lmdb $D/core_meta.json $D/valid_meta.
 for S in core valid train; do
   case $S in core) M=8 ;; valid) M=20 ;; train) M=90 ;; esac
   echo "--- $S (mapsize ${M}G) : $(date) ---"
-  SPLIT=$S KIP=cepte MAPSIZE_GB=$M python -u lmdb_kur_cepte.py || exit 1
+  SPLIT=$S KIP=cepte MAPSIZE_GB=$M python -u build_inpocket_lmdb.py || exit 1
 done
 echo "--- boyutlar ---"; du -sh $D/*.lmdb
 echo "=== Bitti: $(date) ==="

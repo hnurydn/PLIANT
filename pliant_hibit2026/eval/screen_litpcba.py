@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-LITPCBA_dualchannel.py
+screen_litpcba.py
 ======================
 LIT-PCBA protokolu DEGISMEDI: 124 (target, template) kaydi, her kayitta o hedefin
 TUM aktifleri ve TUM decoy'lari, AUC/EF kayit ICINDE hesaplanir, sonra ortalanir.

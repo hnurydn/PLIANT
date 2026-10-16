@@ -25,8 +25,8 @@ echo "yerlesim: $n dilim, eksik npz $eksik"
 [ $eksik -eq 0 ] || { echo "=== EKSIK DILIM VAR, LMDB YAZILMADI ==="; exit 6; }
 for d in lmdb_planet_v2_cepte lmdb_planet_cepte; do [ -e $P/$d/valid_temiz.lmdb ] && { echo "HATA: $P/$d/valid_temiz.lmdb zaten var"; exit 2; }; done
 export SPLIT=valid_temiz KIP=cepte KUYRUK_DOSYA=$K/kuyruk_valid_temiz.txt MAPSIZE_GB=20
-SRC=$P/lmdb_planet_v2 DST=$P/lmdb_planet_v2_cepte python -u lmdb_kur_cepte.py || exit 1
-SRC=$P/lmdb_planet    DST=$P/lmdb_planet_cepte    python -u lmdb_kur_cepte.py || exit 1
+SRC=$P/lmdb_planet_v2 DST=$P/lmdb_planet_v2_cepte python -u build_inpocket_lmdb.py || exit 1
+SRC=$P/lmdb_planet    DST=$P/lmdb_planet_cepte    python -u build_inpocket_lmdb.py || exit 1
 du -sh $P/lmdb_planet_v2_cepte/valid_temiz.lmdb $P/lmdb_planet_cepte/valid_temiz.lmdb
 echo "--- dogrulama ---"
 python -u -W ignore dogrula_vt_cepte.py

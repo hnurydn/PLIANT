@@ -28,7 +28,7 @@ cp $SRC/${SPLIT}_meta.json $LOC/
 echo "LMDB yerel kopya: $(( $(date +%s)-t0 )) sn"
 export LMDB_DIR=$LOC
 echo "SPLIT=$SPLIT  MAXDEC=$MAXDEC  host=$(hostname)  $(date)"
-python -u yerlesim_gecis4.py
+python -u place_decoys.py
 rc=$?
 rm -rf $LOC
 echo "rc=$rc"
