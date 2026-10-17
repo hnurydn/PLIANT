@@ -5,9 +5,17 @@ Affinity NeTwork) and every number reported in the HIBIT 2026 abstract: the trai
 the in-pocket decoy pipeline and the evaluation scripts, together with the Slurm launchers that
 were used, so that each reported value can be traced to the script that produced it.
 
-Files were renamed from their cluster filenames to names that match the variant
-names used in the abstract. [`PROVENANCE.json`](PROVENANCE.json) records, for
-every file, its original filename on the cluster and the md5 of the copy taken.
+Files were renamed from their cluster filenames to readable ones.
+[`PROVENANCE.json`](PROVENANCE.json) records, for every file, its original
+filename on the cluster and the md5 of the copy taken.
+
+> **Filenames predate the current variant names.** They were chosen when the
+> three arms were named additively (`PLIANT` -> `PLIANT-ESM` -> `PLIANT-ESM-Pose`).
+> The naming is now subtractive: the full model is `PLIANT` and the other two are
+> ablations of it. The table below is the authoritative mapping; in particular
+> `pliant_model.py` is **PLIANT-Baseline**, and `pliant_esm_pose_*.py` is
+> **PLIANT**. The files themselves were left untouched so that the md5s in
+> `PROVENANCE.json` still verify against the copies taken from the cluster.
 
 ## The three variants
 
@@ -18,29 +26,31 @@ representation and the pose-aware components.
 
 | Variant | Model module (training) | Model module (evaluation) | Checkpoint |
 |---|---|---|---|
-| **PLIANT** | [`train/pliant_model.py`](train/pliant_model.py) | same | `ABL1_P0_700k/PLANET.iter-700000` |
+| **PLIANT-Baseline** | [`train/pliant_model.py`](train/pliant_model.py) | same | `ABL1_P0_700k/PLANET.iter-700000` |
 | **PLIANT-ESM** | [`train/pliant_esm_model.py`](train/pliant_esm_model.py) | same | `ABL2_P0_700k/PLANET.iter-700000` |
-| **PLIANT-ESM-Pose** | [`train/pliant_esm_pose_train_model.py`](train/pliant_esm_pose_train_model.py) | [`train/pliant_esm_pose_model.py`](train/pliant_esm_pose_model.py) | `BYER0_700k/PLANET.iter-700000` |
+| **PLIANT** | [`train/pliant_esm_pose_train_model.py`](train/pliant_esm_pose_train_model.py) | [`train/pliant_esm_pose_model.py`](train/pliant_esm_pose_model.py) | `BYER0_700k/PLANET.iter-700000` |
 
-PLIANT uses BLOSUM62 residue features (`FEATURE_DIM=20`, run with
-`PLANET_BLOSUM=1`); PLIANT-ESM replaces them with ESM-2 embeddings; PLIANT-ESM-Pose
-adds cross-modal gating and distance-biased vector attention on top.
+PLIANT is the full model: ESM-2 embeddings, cross-modal gating and
+distance-biased vector attention. PLIANT-ESM removes the gating and the vector
+attention but keeps the ESM-2 embeddings; PLIANT-Baseline removes them as well
+and replaces the embeddings with BLOSUM62 residue features (`FEATURE_DIM=20`,
+run with `PLANET_BLOSUM=1`).
 
-For PLIANT-ESM-Pose the training and evaluation modules differ: the two files have
+For PLIANT the training and evaluation modules differ: the two files have
 an identical forward pass and differ only in `compute_loss`, so the checkpoint is
 loaded for evaluation with the second module. Both are included.
 
 | Supporting file | Role |
 |---|---|
-| [`train/layers_pliant_esm.py`](train/layers_pliant_esm.py) | layers for PLIANT and PLIANT-ESM |
-| [`train/layers_pliant_esm_pose.py`](train/layers_pliant_esm_pose.py) | layers for PLIANT-ESM-Pose, including the gating and the distance-biased attention |
-| [`train/train_pliant.py`](train/train_pliant.py) | training driver for PLIANT and PLIANT-ESM |
-| [`train/train_pliant_esm_pose.py`](train/train_pliant_esm_pose.py) | training driver for PLIANT-ESM-Pose |
+| [`train/layers_pliant_esm.py`](train/layers_pliant_esm.py) | layers for PLIANT-Baseline and PLIANT-ESM |
+| [`train/layers_pliant_esm_pose.py`](train/layers_pliant_esm_pose.py) | layers for PLIANT, including the gating and the distance-biased attention |
+| [`train/train_pliant.py`](train/train_pliant.py) | training driver for PLIANT-Baseline and PLIANT-ESM |
+| [`train/train_pliant_esm_pose.py`](train/train_pliant_esm_pose.py) | training driver for PLIANT |
 | [`train/margin_losses.py`](train/margin_losses.py) | both margins: `pose_margin_loss` and `molecule_margin_loss` |
 | [`train/nnutils.py`](train/nnutils.py), [`train/chemutils_esm2_vector.py`](train/chemutils_esm2_vector.py) | tensor helpers and pocket/ligand featurisation, from the upstream PLANET codebase |
 | [`train/slurm_train_continue.sh`](train/slurm_train_continue.sh) | continuation launcher; `TIP=blosum\|esmuw\|byer` selects the variant |
 
-**The first two variants are pose-blind by construction.** The only path from
+**PLIANT-Baseline and PLIANT-ESM are pose-blind by construction.** The only path from
 ligand coordinates to the predicted score is the distance bias inside vector
 attention (`ProteinLigandAttention.geo_bias`). Without it the model cannot
 distinguish two poses of the same ligand — an architectural property, and what the

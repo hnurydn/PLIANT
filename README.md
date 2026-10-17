@@ -39,20 +39,22 @@ cases are labelled separately wherever they appear.
 
 ## Model variants
 
-Three variants are compared. They share the training set, protocol, losses,
-uncertainty-based task weighting and random seed, and all reported values come
-from matched 700k-step checkpoints. The variants differ only in the protein
-representation and the pose-aware components:
+**PLIANT is the proposed model; the other two are ablations of it, not extensions.**
+All three share the training set, protocol, losses, uncertainty-based task
+weighting and random seed, and all reported values come from matched 700k-step
+checkpoints. They differ only in the protein representation and the pose-aware
+components:
 
 | Variant | Protein representation | Pose-aware components | Model module | Checkpoint |
 |---|---|---|---|---|
-| **PLIANT** | BLOSUM62 residue features (`FEATURE_DIM=20`) | none | `PLANET_model_blosum_uw_orj_gercek.py` | `ABL1_P0_700k/PLANET.iter-700000` |
+| **PLIANT-Baseline** | BLOSUM62 residue features (`FEATURE_DIM=20`) | none | `PLANET_model_blosum_uw_orj_gercek.py` | `ABL1_P0_700k/PLANET.iter-700000` |
 | **PLIANT-ESM** | ESM-2 embeddings (1280-d, PCA-reduced to 512) | none | `PLANET_model_esm2_uw_orj_gercek.py` | `ABL2_P0_700k/PLANET.iter-700000` |
-| **PLIANT-ESM-Pose** | ESM-2 embeddings | cross-modal gating + vector attention | `PLANET_model_esm2_vg_orj_ceptemask.py` | `BYER0_700k/PLANET.iter-700000` |
+| **PLIANT** | ESM-2 embeddings | cross-modal gating + vector attention | `PLANET_model_esm2_vg_orj_ceptemask.py` | `BYER0_700k/PLANET.iter-700000` |
 
-The first two are **pose-blind by construction**: removing the distance-biased
-vector attention removes the only path by which ligand coordinates reach the
-score, so these variants assign the same affinity to every pose of a ligand.
+`PLIANT-Baseline` and `PLIANT-ESM` are **pose-blind by construction**: removing
+the distance-biased vector attention removes the only path by which ligand
+coordinates reach the score, so they assign the same affinity to every pose of a
+ligand.
 This is a property of the architecture, not a training artefact, and it is what
 the docking-power and pose-margin results measure.
 
